@@ -9,6 +9,8 @@ import "./styles.css";
 import reportWebVitals from "./reportWebVitals.ts";
 import { ConvexQueryClient } from "@convex-dev/react-query";
 import { ConvexProvider } from "convex/react";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { Toaster } from "./components/ui/sonner.tsx";
 
 const CONVEX_URL = (import.meta as any).env.VITE_CONVEX_URL;
 if (!CONVEX_URL) {
@@ -19,7 +21,7 @@ const convexQueryClient = new ConvexQueryClient(CONVEX_URL);
 // Create a new router instance
 const router = createRouter({
   routeTree,
-  context: {},
+  context: undefined!,
   defaultPreload: "intent",
   scrollRestoration: true,
   defaultStructuralSharing: true,
@@ -33,14 +35,25 @@ declare module "@tanstack/react-router" {
   }
 }
 
-// Render the app
+function App() {
+  const auth = useAuth();
+  return (
+    <>
+      <Toaster />
+      <RouterProvider router={router} context={auth} />
+    </>
+  );
+}
+
 const rootElement = document.getElementById("app");
 if (rootElement && !rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement);
   root.render(
     <StrictMode>
       <ConvexProvider client={convexQueryClient.convexClient}>
-        <RouterProvider router={router} />
+        <AuthProvider>
+          <App />
+        </AuthProvider>
       </ConvexProvider>
     </StrictMode>,
   );
