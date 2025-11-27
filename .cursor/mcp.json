@@ -1,7 +1,7 @@
 {
   "mcpServers": {
     "convex": {
-      "command": "npx",
+      "command": "bunx",
       "args": [
         "-y",
         "convex@latest",
@@ -10,7 +10,7 @@
       ]
     },
     "shadcn": {
-      "command": "npx",
+      "command": "bunx",
       "args": [
         "shadcn@latest",
         "mcp"
