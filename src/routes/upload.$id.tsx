@@ -156,18 +156,19 @@ interface CameraRef {
 function CameraModule({ onPhotoSubmit }: CameraModuleProps) {
   const camera = useRef<CameraRef | null>(null);
   const [image, setImage] = useState<string | null>(null);
+  const [capturedFile, setCapturedFile] = useState<File | null>(null);
   const [numberOfCameras, setNumberOfCameras] = useState(0);
   const [facingMode, setFacingMode] = useState<"user" | "environment">(
     "environment",
   );
   const [isFlashOn, setIsFlashOn] = useState(false);
   const [hasFlash, setHasFlash] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleTakePhoto = async () => {
+  const handleTakePhoto = () => {
     if (camera.current) {
       const base64String = camera.current.takePhoto();
       setImage(base64String);
-
       const base64Data = base64String.split(",")[1];
       const mimeString = base64String.split(",")[0].split(":")[1].split(";")[0];
       const byteString = atob(base64Data);
@@ -181,14 +182,7 @@ function CameraModule({ onPhotoSubmit }: CameraModuleProps) {
         type: mimeString,
       });
 
-      if (onPhotoSubmit) {
-        try {
-          await onPhotoSubmit(file);
-          toast.success("Photo Submitted");
-        } catch (err) {
-          toast.error("Error while Submitting photo");
-        }
-      }
+      setCapturedFile(file);
     }
   };
 
@@ -196,7 +190,6 @@ function CameraModule({ onPhotoSubmit }: CameraModuleProps) {
     if (camera.current && numberOfCameras > 1) {
       camera.current.switchCamera();
       setFacingMode((prev) => (prev === "user" ? "environment" : "user"));
-      // Check flash availability after switching camera
       checkFlashAvailability();
     }
   };
@@ -231,15 +224,27 @@ function CameraModule({ onPhotoSubmit }: CameraModuleProps) {
     }, 500);
     return () => clearTimeout(timer);
   }, [facingMode, numberOfCameras]);
-  const handleSubmit = () => {
-    if (camera.current) {
-      const base64String = camera.current.takePhoto();
-      setImage(base64String);
+
+  const handleSubmit = async () => {
+    if (capturedFile && onPhotoSubmit) {
+      setIsSubmitting(true);
+      try {
+        await onPhotoSubmit(capturedFile);
+        toast.success("Photo Submitted Successfully");
+      } catch (err) {
+        toast.error("Error while submitting photo");
+        console.error("Submission error:", err);
+      } finally {
+        setIsSubmitting(false);
+      }
+    } else {
+      toast.error("No photo captured");
     }
   };
 
   const handleRetake = () => {
     setImage(null);
+    setCapturedFile(null);
   };
 
   return (
@@ -380,10 +385,20 @@ function CameraModule({ onPhotoSubmit }: CameraModuleProps) {
                 <Button
                   onClick={handleSubmit}
                   size="lg"
-                  className="rounded-full bg-green-600 hover:bg-green-700 text-white px-8 shadow-lg"
+                  disabled={isSubmitting || !capturedFile}
+                  className="rounded-full bg-green-600 hover:bg-green-700 text-white px-8 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <Check className="size-5 mr-2" />
-                  Submit
+                  {isSubmitting ? (
+                    <>
+                      <Spinner className="size-5 mr-2" />
+                      Submitting...
+                    </>
+                  ) : (
+                    <>
+                      <Check className="size-5 mr-2" />
+                      Submit
+                    </>
+                  )}
                 </Button>
               </div>
             )}
