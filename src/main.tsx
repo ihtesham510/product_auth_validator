@@ -1,6 +1,7 @@
 import { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
 import { RouterProvider, createRouter } from "@tanstack/react-router";
+import { ConvexQueryCacheProvider } from "convex-helpers/react/cache";
 
 // Import the generated route tree
 import { routeTree } from "./routeTree.gen";
@@ -51,9 +52,11 @@ if (rootElement && !rootElement.innerHTML) {
   root.render(
     <StrictMode>
       <ConvexProvider client={convexQueryClient.convexClient}>
-        <AuthProvider>
-          <App />
-        </AuthProvider>
+        <ConvexQueryCacheProvider>
+          <AuthProvider>
+            <App />
+          </AuthProvider>
+        </ConvexQueryCacheProvider>
       </ConvexProvider>
     </StrictMode>,
   );

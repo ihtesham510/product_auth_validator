@@ -1,8 +1,8 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useState } from "react";
-import { useMutation } from "convex/react";
+import { useState, useEffect } from "react";
+import { useAction, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,13 +25,14 @@ import {
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
 } from "@/components/ui/dialog";
-import { XCircle, CheckCircle2, AlertCircle } from "lucide-react";
+import { XCircle, CheckCircle2, AlertCircle, Gift } from "lucide-react";
 import { PhoneInput } from "./ui/phone-input";
+import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
+import { Link } from "@tanstack/react-router";
+import { useLocalStorage } from "@mantine/hooks";
 
 const verificationSchema = z.object({
   code: z.string().min(1, "Code is required"),
@@ -42,6 +43,10 @@ const verificationSchema = z.object({
 type VerificationFormValues = z.infer<typeof verificationSchema>;
 
 export function VerificationForm() {
+  const [] = useLocalStorage({
+    key: "prize_token",
+    defaultValue: "",
+  });
   const verifyCode = useMutation(api.codes.verifyCode);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogData, setDialogData] = useState<{
@@ -49,7 +54,13 @@ export function VerificationForm() {
     title: string;
     message: string;
     details?: { name: string; phone: string };
+    isValid?: boolean;
+    prize?: { name: string; description: string } | null;
+    uploadId?: string;
+    hasPrize?: boolean;
   } | null>(null);
+
+  const encrypt = useAction(api.node.encrypt);
 
   const form = useForm<VerificationFormValues>({
     resolver: zodResolver(verificationSchema),
@@ -60,60 +71,54 @@ export function VerificationForm() {
     },
   });
 
-  const onSubmit = async (values: VerificationFormValues) => {
-    try {
-      const result = await verifyCode({
-        code: values.code.trim(),
-        name: values.name.trim(),
-        phone: values.phone.trim(),
-      });
-
-      if (result.success) {
-        setDialogData({
-          type: "success",
-          title: "Verification Successful",
-          message: result.message || "Code verified successfully!",
-          details: result.details,
-        });
-        setDialogOpen(true);
-
-        if (result.verified && result.details) {
-          form.reset({
-            code: values.code.trim(),
-            name: result.details.name,
-            phone: result.details.phone,
-          });
-        } else {
-          form.reset();
-        }
-      } else {
-        setDialogData({
-          type: "error",
-          title: "Verification Failed",
-          message: result.error || "Verification failed",
-          details: result.existingDetails,
-        });
-        setDialogOpen(true);
-
-        if (result.existingDetails) {
-          form.reset({
-            code: values.code.trim(),
-            name: result.existingDetails.name,
-            phone: result.existingDetails.phone,
-          });
-        }
-      }
-    } catch (err) {
-      setDialogData({
-        type: "error",
-        title: "Error",
-        message:
-          err instanceof Error
-            ? err.message
-            : "An error occurred during verification",
-      });
-      setDialogOpen(true);
+  useEffect(() => {
+    if (!dialogOpen) {
+      setDialogData(null);
+      form.reset();
     }
+  }, [dialogOpen, form]);
+
+  const onSubmit = async (values: VerificationFormValues) => {
+    const res = await verifyCode({
+      name: values.name.trim(),
+      code: values.code.trim(),
+      phone: values.phone.trim(),
+    });
+
+    if (res.success) {
+      setDialogData({
+        type: "success",
+        title: res.isValid
+          ? "Product Is Original"
+          : "Product Is Genuine (Already Used)",
+        message: res.message || "The Code is Valid",
+        details: {
+          name: values.name.trim(),
+          phone: values.phone.trim(),
+        },
+        uploadId:
+          res.id && !res.prizeClaimed
+            ? await encrypt({ id: res.id })
+            : undefined,
+        isValid: res.isValid,
+        prize: res.prize_info
+          ? {
+              name: res.prize_info.prize_name,
+              description: res.prize_info.description,
+            }
+          : null,
+        hasPrize: res.hasPrize || false,
+      });
+    } else {
+      setDialogData({
+        message:
+          res.message ||
+          "Invalid code. This code does not exist in our system.",
+        title: "Product Is Not Valid",
+        type: "error",
+      });
+    }
+    setDialogOpen(true);
   };
 
   return (
@@ -210,23 +215,55 @@ export function VerificationForm() {
       </CardContent>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent>
+        <DialogContent className="pt-10">
           <DialogHeader>
-            <div className="flex items-center gap-3">
-              {dialogData?.type === "success" ? (
-                <CheckCircle2 className="h-6 w-6 text-green-600" />
-              ) : (
+            {dialogData?.type === "success" ? (
+              <Alert
+                className={
+                  dialogData.isValid === false
+                    ? "bg-yellow-50 border-yellow-200"
+                    : "bg-green-400"
+                }
+              >
+                <CheckCircle2
+                  className={`h-6 w-6 ${dialogData.isValid === false ? "text-yellow-600" : "text-green-600"}`}
+                />
+                <AlertTitle>{dialogData?.title}</AlertTitle>
+                <AlertDescription>{dialogData?.message}</AlertDescription>
+              </Alert>
+            ) : (
+              <Alert className="bg-red-400">
                 <AlertCircle className="h-6 w-6 text-red-600" />
-              )}
-              <DialogTitle>
-                {dialogData?.title || "Verification Result"}
-              </DialogTitle>
-            </div>
-            <DialogDescription className="pt-2">
-              {dialogData?.message}
-            </DialogDescription>
+                <AlertTitle>The Product Code is not valid.</AlertTitle>
+                <AlertDescription>{dialogData?.message}</AlertDescription>
+              </Alert>
+            )}
           </DialogHeader>
-          {dialogData?.details && (
+
+          {dialogData?.hasPrize && dialogData?.prize && dialogData.uploadId && (
+            <Alert className="bg-purple-50 border-purple-200">
+              <Gift className="h-6 w-6 text-purple-600" />
+              <AlertTitle className="text-purple-800">
+                Congratulations! You Won a Prize!
+              </AlertTitle>
+              <AlertDescription className="text-purple-700">
+                <div className="mt-2 space-y-1">
+                  <div className="font-semibold">{dialogData.prize.name}</div>
+                  {dialogData.prize.description && (
+                    <div className="text-sm">
+                      {dialogData.prize.description}
+                    </div>
+                  )}
+                </div>
+                <p>Claim your prize by uploading you're CNIC Picture.</p>
+                <Link to="/upload/$id" params={{ id: dialogData.uploadId }}>
+                  <Button>Upload</Button>
+                </Link>
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {dialogData?.details && dialogData?.isValid === true && (
             <div className="py-4 space-y-2">
               <div className="text-sm font-medium text-gray-700">
                 Verified Details:
@@ -243,6 +280,17 @@ export function VerificationForm() {
               </div>
             </div>
           )}
+
+          {dialogData?.isValid === false && (
+            <Alert className="bg-blue-50 border-blue-200">
+              <AlertCircle className="h-5 w-5 text-blue-600" />
+              <AlertDescription className="text-blue-700 text-sm">
+                Note: This product code is genuine and authentic, but it has
+                already been verified previously.
+              </AlertDescription>
+            </Alert>
+          )}
+
           <DialogFooter>
             <Button onClick={() => setDialogOpen(false)}>Close</Button>
           </DialogFooter>

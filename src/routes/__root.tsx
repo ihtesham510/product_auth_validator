@@ -25,7 +25,7 @@ function RootComponent() {
   }, [isAuthenticated]);
 
   return (
-    <>
+    <div className="relative h-screen">
       {isAuthenticated && <Header />}
       <Outlet />
       <TanStackDevtools
@@ -39,6 +39,6 @@ function RootComponent() {
           },
         ]}
       />
-    </>
+    </div>
   );
 }

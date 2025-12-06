@@ -1,6 +1,7 @@
 import { createContext, useContext } from "react";
 import type { ReactNode } from "react";
-import { useMutation, useQuery } from "convex/react";
+import { useQuery } from "convex-helpers/react/cache";
+import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { useLocalStorage } from "@mantine/hooks";
 import { Spinner } from "@/components/ui/spinner";

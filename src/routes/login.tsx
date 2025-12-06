@@ -56,7 +56,7 @@ function LoginPage() {
     if (res === "Invalid username or password") {
       toast.error(res);
     } else {
-      navigate({ to: "/admin" });
+      navigate({ to: "/" });
       toast.success("Logged In");
     }
   };

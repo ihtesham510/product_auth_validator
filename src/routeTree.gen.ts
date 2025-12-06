@@ -9,13 +9,38 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VerifiedCodesRouteImport } from './routes/verified-codes'
+import { Route as PrizeWinnersRouteImport } from './routes/prize-winners'
+import { Route as PrizeDefinitionsRouteImport } from './routes/prize-definitions'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as CodesRouteImport } from './routes/codes'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as UploadIdRouteImport } from './routes/upload.$id'
 
+const VerifiedCodesRoute = VerifiedCodesRouteImport.update({
+  id: '/verified-codes',
+  path: '/verified-codes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrizeWinnersRoute = PrizeWinnersRouteImport.update({
+  id: '/prize-winners',
+  path: '/prize-winners',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrizeDefinitionsRoute = PrizeDefinitionsRouteImport.update({
+  id: '/prize-definitions',
+  path: '/prize-definitions',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CodesRoute = CodesRouteImport.update({
+  id: '/codes',
+  path: '/codes',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -28,44 +53,122 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UploadIdRoute = UploadIdRouteImport.update({
+  id: '/upload/$id',
+  path: '/upload/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/codes': typeof CodesRoute
   '/login': typeof LoginRoute
+  '/prize-definitions': typeof PrizeDefinitionsRoute
+  '/prize-winners': typeof PrizeWinnersRoute
+  '/verified-codes': typeof VerifiedCodesRoute
+  '/upload/$id': typeof UploadIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/codes': typeof CodesRoute
   '/login': typeof LoginRoute
+  '/prize-definitions': typeof PrizeDefinitionsRoute
+  '/prize-winners': typeof PrizeWinnersRoute
+  '/verified-codes': typeof VerifiedCodesRoute
+  '/upload/$id': typeof UploadIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/codes': typeof CodesRoute
   '/login': typeof LoginRoute
+  '/prize-definitions': typeof PrizeDefinitionsRoute
+  '/prize-winners': typeof PrizeWinnersRoute
+  '/verified-codes': typeof VerifiedCodesRoute
+  '/upload/$id': typeof UploadIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/login'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/codes'
+    | '/login'
+    | '/prize-definitions'
+    | '/prize-winners'
+    | '/verified-codes'
+    | '/upload/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/login'
-  id: '__root__' | '/' | '/admin' | '/login'
+  to:
+    | '/'
+    | '/admin'
+    | '/codes'
+    | '/login'
+    | '/prize-definitions'
+    | '/prize-winners'
+    | '/verified-codes'
+    | '/upload/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/codes'
+    | '/login'
+    | '/prize-definitions'
+    | '/prize-winners'
+    | '/verified-codes'
+    | '/upload/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
+  CodesRoute: typeof CodesRoute
   LoginRoute: typeof LoginRoute
+  PrizeDefinitionsRoute: typeof PrizeDefinitionsRoute
+  PrizeWinnersRoute: typeof PrizeWinnersRoute
+  VerifiedCodesRoute: typeof VerifiedCodesRoute
+  UploadIdRoute: typeof UploadIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/verified-codes': {
+      id: '/verified-codes'
+      path: '/verified-codes'
+      fullPath: '/verified-codes'
+      preLoaderRoute: typeof VerifiedCodesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/prize-winners': {
+      id: '/prize-winners'
+      path: '/prize-winners'
+      fullPath: '/prize-winners'
+      preLoaderRoute: typeof PrizeWinnersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/prize-definitions': {
+      id: '/prize-definitions'
+      path: '/prize-definitions'
+      fullPath: '/prize-definitions'
+      preLoaderRoute: typeof PrizeDefinitionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/codes': {
+      id: '/codes'
+      path: '/codes'
+      fullPath: '/codes'
+      preLoaderRoute: typeof CodesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -82,13 +185,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/upload/$id': {
+      id: '/upload/$id'
+      path: '/upload/$id'
+      fullPath: '/upload/$id'
+      preLoaderRoute: typeof UploadIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
+  CodesRoute: CodesRoute,
   LoginRoute: LoginRoute,
+  PrizeDefinitionsRoute: PrizeDefinitionsRoute,
+  PrizeWinnersRoute: PrizeWinnersRoute,
+  VerifiedCodesRoute: VerifiedCodesRoute,
+  UploadIdRoute: UploadIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

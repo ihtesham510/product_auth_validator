@@ -1,7 +1,16 @@
 import { Link } from "@tanstack/react-router";
 
 import { useState } from "react";
-import { Home, Menu, X, Settings, LogOutIcon } from "lucide-react";
+import {
+  Home,
+  Menu,
+  X,
+  Settings,
+  LogOutIcon,
+  Code,
+  CheckCircle,
+  Trophy,
+} from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function Header() {
@@ -10,7 +19,7 @@ export default function Header() {
 
   return (
     <>
-      <header className="p-4 flex justify-between items-center bg-gray-800 text-white shadow-lg">
+      <header className="sticky top-0 z-40 p-4 flex justify-between items-center bg-gray-800 text-white shadow-lg">
         <button
           onClick={() => setIsOpen(true)}
           className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
@@ -28,9 +37,8 @@ export default function Header() {
       </header>
 
       <aside
-        className={`fixed top-0 left-0 h-full w-80 bg-gray-900 text-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out flex flex-col ${
-          isOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={`fixed top-0 left-0 h-full w-80 bg-gray-900 text-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out flex flex-col ${isOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
       >
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
           <h2 className="text-xl font-bold">Navigation</h2>
@@ -68,6 +76,58 @@ export default function Header() {
           >
             <Settings size={20} />
             <span className="font-medium">Admin Settings</span>
+          </Link>
+
+          <Link
+            to="/codes"
+            onClick={() => setIsOpen(false)}
+            className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors mb-2"
+            activeProps={{
+              className:
+                "flex items-center gap-3 p-3 rounded-lg bg-cyan-600 hover:bg-cyan-700 transition-colors mb-2",
+            }}
+          >
+            <Code size={20} />
+            <span className="font-medium">All Codes</span>
+          </Link>
+
+          <Link
+            to="/verified-codes"
+            onClick={() => setIsOpen(false)}
+            className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors mb-2"
+            activeProps={{
+              className:
+                "flex items-center gap-3 p-3 rounded-lg bg-cyan-600 hover:bg-cyan-700 transition-colors mb-2",
+            }}
+          >
+            <CheckCircle size={20} />
+            <span className="font-medium">Verified Codes</span>
+          </Link>
+
+          <Link
+            to="/prize-winners"
+            onClick={() => setIsOpen(false)}
+            className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors mb-2"
+            activeProps={{
+              className:
+                "flex items-center gap-3 p-3 rounded-lg bg-cyan-600 hover:bg-cyan-700 transition-colors mb-2",
+            }}
+          >
+            <Trophy size={20} />
+            <span className="font-medium">Prize Winners</span>
+          </Link>
+
+          <Link
+            to="/prize-definitions"
+            onClick={() => setIsOpen(false)}
+            className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors mb-2"
+            activeProps={{
+              className:
+                "flex items-center gap-3 p-3 rounded-lg bg-cyan-600 hover:bg-cyan-700 transition-colors mb-2",
+            }}
+          >
+            <Trophy size={20} />
+            <span className="font-medium">Prize Definitions</span>
           </Link>
         </nav>
       </aside>

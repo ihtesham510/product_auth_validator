@@ -108,8 +108,8 @@ function AdminPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4 py-8">
-      <div className="w-full max-w-2xl space-y-6">
+    <div className="min-h-screen bg-gray-100 px-4 py-8">
+      <div className="max-w-7xl mx-auto space-y-6">
         {/* Admin Credentials Card */}
         <Card className="w-full max-w-md mx-auto">
           <CardHeader className="space-y-1">

@@ -10,6 +10,9 @@
 
 import type * as auth from "../auth.js";
 import type * as codes from "../codes.js";
+import type * as node from "../node.js";
+import type * as prizes from "../prizes.js";
+import type * as storage from "../storage.js";
 
 import type {
   ApiFromModules,
@@ -20,6 +23,9 @@ import type {
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   codes: typeof codes;
+  node: typeof node;
+  prizes: typeof prizes;
+  storage: typeof storage;
 }>;
 
 /**
