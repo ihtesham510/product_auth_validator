@@ -1,0 +1,15 @@
+{
+  "projectName": "product_auth_validator",
+  "mode": "file-router",
+  "typescript": true,
+  "tailwind": true,
+  "packageManager": "bun",
+  "addOnOptions": {},
+  "git": true,
+  "version": 1,
+  "framework": "react-cra",
+  "chosenAddOns": [
+    "convex",
+    "shadcn"
+  ]
+}
