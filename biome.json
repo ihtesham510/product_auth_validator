@@ -1,0 +1,68 @@
+{
+	"$schema": "https://biomejs.dev/schemas/2.3.11/schema.json",
+	"css": {
+		"assist": {
+			"enabled": true
+		},
+		"parser": {
+			"tailwindDirectives": true
+		}
+	},
+	"vcs": {
+		"enabled": true,
+		"clientKind": "git",
+		"useIgnoreFile": true
+	},
+	"files": {
+		"includes": ["**", "!!**/dist", "!**/*.gen.ts", "!**/_generated/*"]
+	},
+	"formatter": {
+		"enabled": true,
+		"indentStyle": "tab"
+	},
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"recommended": true,
+			"style": {
+				"noNonNullAssertion": "off"
+			},
+			"a11y": {
+				"useButtonType": "off",
+				"useSemanticElements": "off",
+				"noStaticElementInteractions": "off",
+				"useKeyWithClickEvents": "off"
+			},
+			"complexity": {
+				"useOptionalChain": "off"
+			},
+			"correctness": {
+				"noEmptyPattern": "error",
+				"useExhaustiveDependencies": "warn",
+				"noUnusedVariables": "warn"
+			},
+			"suspicious": {
+				"noDoubleEquals": "off",
+				"noArrayIndexKey": "off",
+				"noExplicitAny": "error"
+			}
+		}
+	},
+	"javascript": {
+		"formatter": {
+			"quoteStyle": "single",
+			"arrowParentheses": "asNeeded",
+			"semicolons": "asNeeded",
+			"jsxQuoteStyle": "single"
+		}
+	},
+	"assist": {
+		"enabled": true,
+		"actions": {
+			"source": {
+				"organizeImports": "on",
+				"recommended": true
+			}
+		}
+	}
+}
