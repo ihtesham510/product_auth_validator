@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { api } from 'convex/_generated/api'
 import type { Id } from 'convex/_generated/dataModel'
 import { useMutation, useQuery } from 'convex/react'
-import { Check, ChevronsUpDown, Trophy } from 'lucide-react'
+import { AlertCircle, Check, ChevronsUpDown, Trophy } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
@@ -38,6 +38,7 @@ import {
 	PopoverTrigger,
 } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
+import { Alert, AlertDescription,  AlertTitle } from '@/components/ui/alert'
 
 const prizeAssignmentSchema = z.object({
 	code_id: z.string().min(1, 'Code is required'),
@@ -100,6 +101,13 @@ export function PrizeAssignmentDialog({
 						Select a code and assign a prize definition to it
 					</DialogDescription>
 				</DialogHeader>
+				<Alert variant='default'>
+						<AlertCircle />
+						<AlertTitle>Prize Cannot be changed once assigned</AlertTitle>
+						<AlertDescription>
+							Once a prize is assigned, it cannot be changed due to security constraints.
+						</AlertDescription>
+					</Alert>
 				<Form {...assignmentForm}>
 					<form
 						onSubmit={assignmentForm.handleSubmit(handleAssignPrize)}

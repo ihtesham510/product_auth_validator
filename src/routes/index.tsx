@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useAuth } from '../contexts/AuthContext'
-import { VerificationForm } from '../components/VerificationForm'
+import { useAuth } from '@/contexts/AuthContext'
+import { VerificationForm } from '@/components/VerificationForm'
 import { ImportCodes } from '@/components/ImportCodes'
 
 export const Route = createFileRoute('/')({
