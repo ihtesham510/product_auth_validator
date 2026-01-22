@@ -4,7 +4,7 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vite --port 3000",
-		"build": "bunx tsc",
+		"build": "vite build && bunx tsc",
 		"test": "vitest run",
 		"serve": "vite preview",
 		"lint": "biome lint",
