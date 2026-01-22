@@ -62,7 +62,7 @@ import {
 } from '@/components/ui/popover'
 import { Spinner } from '@/components/ui/spinner'
 import { cn } from '@/lib/utils'
-import { Alert, AlertDescription,  AlertTitle } from '@/components/ui/alert'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 
 export const Route = createFileRoute('/codes')({
 	component: CodesPage,
@@ -293,22 +293,20 @@ function ActionsCell({ row }: { row: Row<Code> }) {
 
 	const selectedPrize = prizeDefinitions?.find(pd => pd._id === currentValue)
 
-
 	return (
 		<React.Fragment>
 			<Dialog open={open} onOpenChange={setIsOpen}>
 				<DialogContent>
 					<DialogHeader>
 						<DialogTitle>Assign Prize</DialogTitle>
-						<DialogDescription>
-							Assign a prize to the code
-						</DialogDescription>
+						<DialogDescription>Assign a prize to the code</DialogDescription>
 					</DialogHeader>
 					<Alert variant='default'>
 						<AlertCircle />
 						<AlertTitle>Prize Cannot be changed once assigned</AlertTitle>
 						<AlertDescription>
-							Once a prize is assigned, it cannot be changed due to security constraints.
+							Once a prize is assigned, it cannot be changed due to security
+							constraints.
 						</AlertDescription>
 					</Alert>
 					<FieldGroup>
@@ -388,17 +386,23 @@ function ActionsCell({ row }: { row: Row<Code> }) {
 			</Dialog>
 			<DropdownMenu>
 				<DropdownMenuTrigger asChild>
-					<Button size='icon-sm' variant='ghost' disabled={!row.original.isValid}>
+					<Button
+						size='icon-sm'
+						variant='ghost'
+						disabled={!row.original.isValid}
+					>
 						<Ellipsis />
 					</Button>
 				</DropdownMenuTrigger>
 				<DropdownMenuContent>
-					{row.original.prizeName === null &&<DropdownMenuItem
-						onClick={() => setIsOpen(true)}
-						className='flex justify-between items-center'
-					>
-						Add Prize <Trophy />
-					</DropdownMenuItem>}
+					{row.original.prizeName === null && (
+						<DropdownMenuItem
+							onClick={() => setIsOpen(true)}
+							className='flex justify-between items-center'
+						>
+							Add Prize <Trophy />
+						</DropdownMenuItem>
+					)}
 					<DropdownMenuItem
 						onClick={() => setEdit(true)}
 						className='flex justify-between items-center'

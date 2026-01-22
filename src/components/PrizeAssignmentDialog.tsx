@@ -38,7 +38,7 @@ import {
 	PopoverTrigger,
 } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
-import { Alert, AlertDescription,  AlertTitle } from '@/components/ui/alert'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 
 const prizeAssignmentSchema = z.object({
 	code_id: z.string().min(1, 'Code is required'),
@@ -102,12 +102,13 @@ export function PrizeAssignmentDialog({
 					</DialogDescription>
 				</DialogHeader>
 				<Alert variant='default'>
-						<AlertCircle />
-						<AlertTitle>Prize Cannot be changed once assigned</AlertTitle>
-						<AlertDescription>
-							Once a prize is assigned, it cannot be changed due to security constraints.
-						</AlertDescription>
-					</Alert>
+					<AlertCircle />
+					<AlertTitle>Prize Cannot be changed once assigned</AlertTitle>
+					<AlertDescription>
+						Once a prize is assigned, it cannot be changed due to security
+						constraints.
+					</AlertDescription>
+				</Alert>
 				<Form {...assignmentForm}>
 					<form
 						onSubmit={assignmentForm.handleSubmit(handleAssignPrize)}
