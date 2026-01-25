@@ -1,6 +1,12 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
-import { useQuery, useMutation } from 'convex/react'
-import { api } from '../../convex/_generated/api'
+import { api } from 'convex/_generated/api'
+import type { Id } from 'convex/_generated/dataModel'
+import { useMutation, useQuery } from 'convex/react'
+import { CheckCircle2, Image as ImageIcon, Trophy, XCircle } from 'lucide-react'
+import { useState } from 'react'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import {
 	Card,
 	CardContent,
@@ -9,18 +15,6 @@ import {
 	CardTitle,
 } from '@/components/ui/card'
 import {
-	Table,
-	TableBody,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
-} from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Trophy, CheckCircle2, XCircle, Image as ImageIcon } from 'lucide-react'
-import { useState } from 'react'
-import {
 	Dialog,
 	DialogContent,
 	DialogDescription,
@@ -28,7 +22,15 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from '@/components/ui/dialog'
-import type { Id } from 'convex/_generated/dataModel'
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from '@/components/ui/table'
+import { Skeleton } from '@/components/ui/skeleton'
 
 export const Route = createFileRoute('/prize-winners')({
 	component: PrizeWinnersPage,
@@ -202,11 +204,16 @@ function PrizeWinnersPage() {
 					</DialogHeader>
 					{selectedImageUrl && (
 						<div className='flex justify-center'>
-							<img
-								src={selectedImageUrl}
-								alt='CNIC'
-								className='max-w-full h-auto rounded-md border'
-							/>
+							<Avatar className='w-full max-h-[800px] min-h-[300px] rounded-none'>
+								<AvatarImage
+									src={selectedImageUrl}
+									alt='CNIC'
+									className='object-contain rounded-md'
+								/>
+								<AvatarFallback className='rounded-none'>
+									<Skeleton className='w-full h-[300px] bg-primary/10' />
+								</AvatarFallback>
+							</Avatar>
 						</div>
 					)}
 					<DialogFooter>

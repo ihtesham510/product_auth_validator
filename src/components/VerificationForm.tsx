@@ -98,9 +98,9 @@ export function VerificationForm() {
 				isValid: res.isValid,
 				prize: res.prize_info
 					? {
-							name: res.prize_info.prize_name,
-							description: res.prize_info.description,
-						}
+						name: res.prize_info.prize_name,
+						description: res.prize_info.description,
+					}
 					: null,
 				hasPrize: res.hasPrize || false,
 			})
