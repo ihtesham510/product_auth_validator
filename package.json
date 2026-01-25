@@ -7,7 +7,7 @@
 		"build": "vite build && bunx tsc",
 		"test": "vitest run",
 		"serve": "vite preview",
-		"lint": "biome lint",
+		"lint": "biome lint && bunx tsc",
 		"format": "biome format",
 		"format-staged": "biome format --staged",
 		"format-apply": "biome format --write"

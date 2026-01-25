@@ -142,10 +142,12 @@ function PrizeWinnersPage() {
 															variant='outline'
 															size='sm'
 															onClick={() => {
-																setSelectedImageUrl(
-																	claimablePrize.cnic_image_url,
-																)
-																setImageDialogOpen(true)
+																if (claimablePrize.cnic_image_url) {
+																	setSelectedImageUrl(
+																		claimablePrize.cnic_image_url,
+																	)
+																	setImageDialogOpen(true)
+																}
 															}}
 														>
 															<ImageIcon className='h-4 w-4 mr-1' />

@@ -40,10 +40,13 @@ import {
 	TableRow,
 } from '@/components/ui/table'
 import { Textarea } from '@/components/ui/textarea'
+import { Checkbox } from './ui/checkbox'
+import { Spinner } from './ui/spinner'
 
 const prizeDefinitionSchema = z.object({
 	prize_name: z.string().min(1, 'Prize name is required'),
 	description: z.string().min(1, 'Description is required'),
+	requires_cnic: z.boolean(),
 })
 
 type PrizeDefinitionFormValues = z.infer<typeof prizeDefinitionSchema>
@@ -73,11 +76,13 @@ export function PrizeDefinitions() {
 					prize_definition_id: editingPrize,
 					prize_name: values.prize_name.trim(),
 					description: values.description.trim(),
+					requires_cnic: values.requires_cnic,
 				})
 			} else {
 				await createPrizeDefinition({
 					prize_name: values.prize_name.trim(),
 					description: values.description.trim(),
+					requires_cnic: values.requires_cnic,
 				})
 			}
 			prizeForm.reset()
@@ -102,11 +107,13 @@ export function PrizeDefinitions() {
 		_id: Id<'prize_definitions'>
 		prize_name: string
 		description: string
+		requires_cnic: boolean
 	}) => {
 		setEditingPrize(prize._id)
 		prizeForm.reset({
 			prize_name: prize.prize_name,
 			description: prize.description,
+			requires_cnic: prize.requires_cnic,
 		})
 		setPrizeDialogOpen(true)
 	}
@@ -149,6 +156,7 @@ export function PrizeDefinitions() {
 									<TableRow>
 										<TableHead>Prize Name</TableHead>
 										<TableHead>Description</TableHead>
+										<TableHead>Requires CNIC</TableHead>
 										<TableHead>Actions</TableHead>
 									</TableRow>
 								</TableHeader>
@@ -159,6 +167,9 @@ export function PrizeDefinitions() {
 												{prize.prize_name}
 											</TableCell>
 											<TableCell>{prize.description}</TableCell>
+											<TableCell>
+												{prize.requires_cnic ? 'Yes' : 'No'}
+											</TableCell>
 											<TableCell>
 												<div className='flex gap-2'>
 													<Button
@@ -235,6 +246,23 @@ export function PrizeDefinitions() {
 									</FormItem>
 								)}
 							/>
+							<FormField
+								control={prizeForm.control}
+								name='requires_cnic'
+								render={({ field }) => (
+									<FormItem className='flex gap-4 items-center'>
+										<FormControl>
+											<Checkbox
+												onCheckedChange={field.onChange}
+												checked={field.value}
+											/>
+										</FormControl>
+										<FormLabel>Requires CNIC</FormLabel>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+
 							<DialogFooter>
 								<Button
 									type='button'
@@ -247,8 +275,19 @@ export function PrizeDefinitions() {
 								>
 									Cancel
 								</Button>
-								<Button type='submit'>
-									{editingPrize ? 'Update' : 'Create'}
+								<Button
+									type='submit'
+									disabled={prizeForm.formState.isSubmitting}
+								>
+									{prizeForm.formState.isSubmitting ? (
+										<p className='flex items-center gap-2'>
+											<Spinner /> <p>Submitting</p>
+										</p>
+									) : editingPrize ? (
+										'Update'
+									) : (
+										'Create'
+									)}
 								</Button>
 							</DialogFooter>
 						</form>
@@ -258,4 +297,3 @@ export function PrizeDefinitions() {
 		</>
 	)
 }
-

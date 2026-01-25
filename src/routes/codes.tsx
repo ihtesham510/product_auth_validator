@@ -19,10 +19,12 @@ import {
 } from 'lucide-react'
 import React, { useState } from 'react'
 import { toast } from 'sonner'
+import { CopyCodeButton } from '@/components/copy-code'
 import { DataTable } from '@/components/data-table'
 import { EditCodeForm } from '@/components/EditCodeForm'
 import { ImportCodes } from '@/components/ImportCodes'
 import { PrizeAssignmentDialog } from '@/components/PrizeAssignmentDialog'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -62,7 +64,6 @@ import {
 } from '@/components/ui/popover'
 import { Spinner } from '@/components/ui/spinner'
 import { cn } from '@/lib/utils'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 
 export const Route = createFileRoute('/codes')({
 	component: CodesPage,
@@ -164,8 +165,16 @@ function CodesPage() {
 									},
 									{
 										accessorKey: 'code',
-										header: 'Code',
-										cell: ({ row }) => <div>{row.getValue('code')}</div>,
+										header: () => <div className='ml-10'>Code</div>,
+										cell: ({ row }) => (
+											<div className='group flex items-center'>
+												<CopyCodeButton
+													code={row.getValue('code')}
+													className='group-hover:opacity-90 opacity-0 transition-opacity'
+												/>
+												<p>{row.getValue('code')}</p>
+											</div>
+										),
 									},
 									{
 										accessorKey: 'verifiedDetails',

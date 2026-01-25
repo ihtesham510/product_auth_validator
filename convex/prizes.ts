@@ -1,17 +1,19 @@
 import { ConvexError, v } from 'convex/values'
+import type { MutationCtx, QueryCtx } from './_generated/server'
 import { mutation, query } from './_generated/server'
-import type { QueryCtx, MutationCtx } from './_generated/server'
 
 // Prize Definition Management
 export const createPrizeDefinition = mutation({
 	args: {
 		prize_name: v.string(),
 		description: v.string(),
+		requires_cnic: v.boolean(),
 	},
 	handler: async (ctx: MutationCtx, args) => {
 		const prizeDefinitionId = await ctx.db.insert('prize_definitions', {
 			prize_name: args.prize_name.trim(),
 			description: args.description.trim(),
+			requires_cnic: args.requires_cnic,
 		})
 		return { success: true, id: prizeDefinitionId }
 	},
@@ -29,11 +31,13 @@ export const updatePrizeDefinition = mutation({
 		prize_definition_id: v.id('prize_definitions'),
 		prize_name: v.string(),
 		description: v.string(),
+		requires_cnic: v.boolean(),
 	},
 	handler: async (ctx: MutationCtx, args) => {
 		await ctx.db.patch(args.prize_definition_id, {
 			prize_name: args.prize_name.trim(),
 			description: args.description.trim(),
+			requires_cnic: args.requires_cnic,
 		})
 		return { success: true }
 	},
@@ -184,8 +188,8 @@ export const hasClaimed = query({
 export const enterClaimablePrize = mutation({
 	args: {
 		verified_code_id: v.id('verified_codes'),
-		cnic_image_url: v.string(),
-		storageId: v.id('_storage'),
+		cnic_image_url: v.optional(v.string()),
+		storageId: v.optional(v.id('_storage')),
 	},
 	async handler(ctx, args) {
 		const verified_code = await ctx.db.get(args.verified_code_id)

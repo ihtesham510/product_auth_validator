@@ -26,6 +26,7 @@ export default defineSchema({
 	prize_definitions: defineTable({
 		prize_name: v.string(),
 		description: v.string(),
+		requires_cnic: v.boolean(),
 	}),
 
 	prizes: defineTable({
@@ -39,9 +40,9 @@ export default defineSchema({
 		prize_id: v.id('prizes'),
 		code_id: v.id('codes'),
 		verified_code_id: v.id('verified_codes'),
-		cnic_image_url: v.string(),
+		cnic_image_url: v.optional(v.string()),
 		status: v.union(v.literal('claimed'), v.literal('unClaimed')),
-		storageId: v.id('_storage'),
+		storageId: v.optional(v.id('_storage')),
 		claimed_at: v.optional(v.number()),
 	})
 		.index('prize_id', ['prize_id'])

@@ -32,6 +32,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Alert, AlertDescription, AlertTitle } from './ui/alert'
 import { PhoneInput } from './ui/phone-input'
+import { useLocalStorage } from '@mantine/hooks'
 
 const verificationSchema = z.object({
 	code: z.string().min(1, 'Code is required'),
@@ -43,18 +44,26 @@ type VerificationFormValues = z.infer<typeof verificationSchema>
 
 export function VerificationForm() {
 	const verifyCode = useMutation(api.codes.verifyCode)
-	const [dialogOpen, setDialogOpen] = useState(false)
-	const [dialogData, setDialogData] = useState<{
+	const enterClaimablePrize = useMutation(api.prizes.enterClaimablePrize)
+	const [dialogData, setDialogData] = useLocalStorage<{
 		type: 'success' | 'error'
 		title: string
 		message: string
 		details?: { name: string; phone: string }
 		isValid?: boolean
-		prize?: { name: string; description: string } | null
+		prize?: {
+			name: string
+			description: string
+			requires_cnic: boolean
+		} | null
 		uploadId?: string
 		hasPrize?: boolean
-	} | null>(null)
+	} | null>({
+		key: 'prize data',
+		defaultValue: null,
+	})
 
+	const [dialogOpen, setDialogOpen] = useState(false)
 	const encrypt = useAction(api.node.encrypt)
 
 	const form = useForm<VerificationFormValues>({
@@ -67,11 +76,15 @@ export function VerificationForm() {
 	})
 
 	useEffect(() => {
+		if (dialogData) setDialogOpen(true)
+	}, [dialogData])
+
+	useEffect(() => {
 		if (!dialogOpen) {
 			setDialogData(null)
 			form.reset()
 		}
-	}, [dialogOpen, form])
+	}, [dialogOpen, form, setDialogData])
 
 	const onSubmit = async (values: VerificationFormValues) => {
 		const res = await verifyCode({
@@ -79,6 +92,11 @@ export function VerificationForm() {
 			code: values.code.trim(),
 			phone: values.phone.trim(),
 		})
+		if (!res.prize_info?.requires_cnic && res.id) {
+			await enterClaimablePrize({
+				verified_code_id: res.id,
+			})
+		}
 
 		if (res.success) {
 			setDialogData({
@@ -98,9 +116,10 @@ export function VerificationForm() {
 				isValid: res.isValid,
 				prize: res.prize_info
 					? {
-						name: res.prize_info.prize_name,
-						description: res.prize_info.description,
-					}
+							name: res.prize_info.prize_name,
+							description: res.prize_info.description,
+							requires_cnic: res.prize_info.requires_cnic,
+						}
 					: null,
 				hasPrize: res.hasPrize || false,
 			})
@@ -250,10 +269,11 @@ export function VerificationForm() {
 										</div>
 									)}
 								</div>
-								<p>Claim your prize by uploading you're CNIC Picture.</p>
-								<Link to='/upload/$id' params={{ id: dialogData.uploadId }}>
-									<Button>Upload</Button>
-								</Link>
+								{dialogData.prize.requires_cnic && (
+									<Link to='/upload/$id' params={{ id: dialogData.uploadId }}>
+										<Button>Upload</Button>
+									</Link>
+								)}
 							</AlertDescription>
 						</Alert>
 					)}
