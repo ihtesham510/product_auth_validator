@@ -17,13 +17,15 @@ import {
 	Trophy,
 	XCircle,
 } from 'lucide-react'
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
+import type { Table as TanstackTable } from '@tanstack/react-table'
 import { toast } from 'sonner'
 import { CopyCodeButton } from '@/components/copy-code'
 import { DataTable } from '@/components/data-table'
 import { EditCodeForm } from '@/components/EditCodeForm'
 import { ImportCodes } from '@/components/ImportCodes'
 import { PrizeAssignmentDialog } from '@/components/PrizeAssignmentDialog'
+import { BulkPrizeAssignmentDialog } from '@/components/BulkPrizeAssignmentDialog'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -82,7 +84,10 @@ function CodesPage() {
 	const codes = useQuery(api.codes.getAllCodes, {})
 	const deleteCodes = useMutation(api.codes.deleteCodes)
 	const [assignmentDialogOpen, setAssignmentDialogOpen] = useState(false)
+	const [bulkAssignmentDialogOpen, setBulkAssignmentDialogOpen] = useState(false)
+	const [selectedCodeIds, setSelectedCodeIds] = useState<Id<'codes'>[]>([])
 	const [importDialog, setImportDialog] = useState(false)
+	const tableRef = useRef<TanstackTable<Code> | null>(null)
 
 	if (codes === undefined) {
 		return (
@@ -126,18 +131,35 @@ function CodesPage() {
 								data={codes}
 								filterColumn='code'
 								SelectedRowContent={props => {
+									// Store table reference
+									tableRef.current = props.table
+									const selectedIds = props.rows.map(row =>
+										row.getValue('id'),
+									) as Id<'codes'>[]
 									return (
-										<Button
-											variant='destructive'
-											onClick={async () => {
-												await deleteCodes({
-													ids: props.rows.map(row => row.getValue('id')),
-												})
-												props.table.resetRowSelection()
-											}}
-										>
-											<TrashIcon />
-										</Button>
+										<div className='flex items-center gap-2'>
+											<Button
+												variant='default'
+												onClick={() => {
+													setSelectedCodeIds(selectedIds)
+													setBulkAssignmentDialogOpen(true)
+												}}
+											>
+												<Trophy className='h-4 w-4 mr-2' />
+												Assign Prize
+											</Button>
+											<Button
+												variant='destructive'
+												onClick={async () => {
+													await deleteCodes({
+														ids: selectedIds,
+													})
+													props.table.resetRowSelection()
+												}}
+											>
+												<TrashIcon />
+											</Button>
+										</div>
 									)
 								}}
 								columns={[
@@ -245,6 +267,18 @@ function CodesPage() {
 				<PrizeAssignmentDialog
 					open={assignmentDialogOpen}
 					onOpenChange={setAssignmentDialogOpen}
+				/>
+				<BulkPrizeAssignmentDialog
+					open={bulkAssignmentDialogOpen}
+					onOpenChange={setBulkAssignmentDialogOpen}
+					selectedCodeIds={selectedCodeIds}
+					allCodes={codes}
+					onSuccess={() => {
+						// Reset selection after successful assignment
+						if (tableRef.current) {
+							tableRef.current.resetRowSelection()
+						}
+					}}
 				/>
 				<Dialog open={importDialog} onOpenChange={e => setImportDialog(e)}>
 					<DialogContent className='min-w-max p-12'>

@@ -1,13 +1,11 @@
-import { createFileRoute, redirect } from '@tanstack/react-router'
-import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import * as z from 'zod'
+import { createFileRoute, redirect } from '@tanstack/react-router'
+import { api } from 'convex/_generated/api'
+import { useMutation, useQuery } from 'convex/react'
 import { useEffect } from 'react'
-import { useQuery, useMutation } from 'convex/react'
-import { api } from '../../convex/_generated/api'
+import { useForm } from 'react-hook-form'
+import * as z from 'zod'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { PasswordInput } from '@/components/ui/password-input'
 import {
 	Card,
 	CardContent,
@@ -18,12 +16,14 @@ import {
 import {
 	Form,
 	FormControl,
+	FormDescription,
 	FormField,
 	FormItem,
 	FormLabel,
 	FormMessage,
-	FormDescription,
 } from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
+import { PasswordInput } from '@/components/ui/password-input'
 
 const adminCredentialsSchema = z
 	.object({
