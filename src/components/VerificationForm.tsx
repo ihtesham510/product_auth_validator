@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useLocalStorage } from '@mantine/hooks'
 import { Link } from '@tanstack/react-router'
 import { api } from 'convex/_generated/api'
 import { useAction, useMutation } from 'convex/react'
@@ -32,7 +33,6 @@ import {
 import { Input } from '@/components/ui/input'
 import { Alert, AlertDescription, AlertTitle } from './ui/alert'
 import { PhoneInput } from './ui/phone-input'
-import { useLocalStorage } from '@mantine/hooks'
 
 const verificationSchema = z.object({
 	code: z.string().min(1, 'Code is required'),
@@ -262,7 +262,6 @@ export function VerificationForm() {
 							</AlertTitle>
 							<AlertDescription className='text-purple-700'>
 								<div className='mt-2 space-y-1'>
-									<div className='font-semibold'>{dialogData.prize.name}</div>
 									{dialogData.prize.description && (
 										<div className='text-sm'>
 											{dialogData.prize.description}
