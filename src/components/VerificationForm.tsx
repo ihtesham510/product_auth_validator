@@ -258,13 +258,12 @@ export function VerificationForm() {
 						<Alert className='bg-purple-50 border-purple-200'>
 							<Gift className='h-6 w-6 text-purple-600' />
 							<AlertTitle className='text-purple-800'>
-								Congratulations! You Won a Prize!
+								Congratulations! You've Won {dialogData.prize.name}!
 							</AlertTitle>
 							<AlertDescription className='text-purple-700'>
 								<div className='mt-2 space-y-1'>
 									{dialogData.prize && (
 										<div className='text-sm'>
-											Congratulations You've Won {dialogData.prize.name}.
 											{dialogData.prize.description}
 										</div>
 									)}
