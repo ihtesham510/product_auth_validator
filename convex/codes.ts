@@ -153,7 +153,13 @@ export const getVerifiedCodeByCodeId = query({
 
 export const importCodes = mutation({
 	args: {
-		codes: v.array(v.string()),
+		codes: v.array(
+			v.object({
+				code: v.string(),
+				serial: v.string(),
+				carton: v.string(),
+			}),
+		),
 	},
 	handler: async (ctx: MutationCtx, args) => {
 		const batchSize = 100 // Process codes in batches to avoid timeouts
@@ -165,16 +171,18 @@ export const importCodes = mutation({
 			const batch = args.codes.slice(i, i + batchSize)
 
 			for (const code of batch) {
-				if (!code || typeof code !== 'string' || code.trim() === '') {
+				if (!code || typeof code.code !== 'string' || code.code.trim() === '') {
 					skipped++
 					continue
 				}
 
-				const trimmedCode = code.trim()
+				const trimmedCode = code.code.trim()
+				const trimmedSerial = code.serial.trim()
+				const trimmedCarton = code.carton.trim()
 
 				const existingCode = await ctx.db
 					.query('codes')
-					.withIndex('code', q => q.eq('code', trimmedCode))
+					.withIndex('by_serial', q => q.eq('serial', trimmedSerial))
 					.first()
 
 				if (existingCode) {
@@ -185,6 +193,8 @@ export const importCodes = mutation({
 				try {
 					await ctx.db.insert('codes', {
 						code: trimmedCode,
+						serial: trimmedSerial,
+						carton: trimmedCarton,
 						isValid: true,
 					})
 					imported++
@@ -235,6 +245,8 @@ export const getAllCodes = query({
 				return {
 					id: code._id,
 					code: code.code,
+					serial: code.serial,
+					carton: code.carton,
 					isValid: code.isValid,
 					verified: !!verifiedCode,
 					verifiedDetails: verifiedCode
@@ -277,6 +289,8 @@ export const getAllVerifiedCodes = query({
 					name: verifiedCode.name,
 					phone: verifiedCode.phone,
 					code: code?.code || null,
+					serial: code?.serial ?? null,
+					carton: code?.carton ?? null,
 					codeId: verifiedCode.code,
 					isValid: code?.isValid || false,
 					prizeName,
@@ -356,6 +370,36 @@ export const deleteCodes = mutation({
 				if (verified_code) {
 					await ctx.db.delete(verified_code?._id)
 				}
+			}),
+		)
+	},
+})
+
+export const reset_data = mutation({
+	async handler(ctx) {
+		const codes = await ctx.db.query('codes').collect()
+		return await Promise.all(
+			codes.map(async code => {
+				const varified_codes = await ctx.db
+					.query('verified_codes')
+					.withIndex('code', q => q.eq('code', code._id))
+					.collect()
+				const prizes = await ctx.db
+					.query('prizes')
+					.withIndex('code_id', q => q.eq('code_id', code._id))
+					.collect()
+				const claimable_prizes = await ctx.db
+					.query('claimable_prizes')
+					.withIndex('code_id', q => q.eq('code_id', code._id))
+					.collect()
+				for (const arr of [varified_codes, prizes, claimable_prizes]) {
+					await Promise.all(
+						arr.map(async item => {
+							return await ctx.db.delete(item._id)
+						}),
+					)
+				}
+				return await ctx.db.delete(code._id)
 			}),
 		)
 	},

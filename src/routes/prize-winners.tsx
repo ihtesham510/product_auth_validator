@@ -22,6 +22,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from '@/components/ui/dialog'
+import { Skeleton } from '@/components/ui/skeleton'
 import {
 	Table,
 	TableBody,
@@ -30,7 +31,6 @@ import {
 	TableHeader,
 	TableRow,
 } from '@/components/ui/table'
-import { Skeleton } from '@/components/ui/skeleton'
 
 export const Route = createFileRoute('/prize-winners')({
 	component: PrizeWinnersPage,
@@ -74,7 +74,7 @@ function PrizeWinnersPage() {
 
 	return (
 		<div className='min-h-screen bg-gray-100 px-4 py-8'>
-			<div className='max-w-7xl mx-auto'>
+			<div className='max-w-full mx-auto'>
 				<Card>
 					<CardHeader>
 						<CardTitle className='text-2xl font-bold'>Prize Winners</CardTitle>

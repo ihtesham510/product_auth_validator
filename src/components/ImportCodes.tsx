@@ -1,6 +1,8 @@
-import { useState, useRef } from 'react'
 import { useMutation } from 'convex/react'
-import { api } from '../../convex/_generated/api'
+import { FileSpreadsheet, Upload } from 'lucide-react'
+import { useRef, useState } from 'react'
+import { toast } from 'sonner'
+import * as XLSX from 'xlsx'
 import {
 	Card,
 	CardContent,
@@ -8,9 +10,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from '@/components/ui/card'
-import { Upload, FileSpreadsheet } from 'lucide-react'
-import * as XLSX from 'xlsx'
-import { toast } from 'sonner'
+import { api } from '../../convex/_generated/api'
 
 export function ImportCodes() {
 	const importCodes = useMutation(api.codes.importCodes)
@@ -50,28 +50,34 @@ export function ImportCodes() {
 				defval: '',
 			}) as string[][]
 
-			const codes: string[] = []
-			for (let i = 0; i < jsonData.length; i++) {
-				const firstCell = jsonData[i][0]
+			const codes: { serial: string; code: string; carton: string }[] = []
+
+			for (const row of jsonData) {
+				const serialCell = row[0]
+				const cartonCell = row[1]
+				const codeCell = row[2]
 				if (
-					firstCell &&
-					typeof firstCell === 'string' &&
-					firstCell.trim() !== ''
+					(typeof cartonCell === 'string' || typeof cartonCell === 'number') &&
+					typeof cartonCell == 'string'
+						? cartonCell.trim() == ''
+						: true &&
+								(typeof serialCell === 'string' ||
+									typeof serialCell === 'number') &&
+								typeof serialCell == 'string'
+							? serialCell.trim() == ''
+							: true && typeof codeCell === 'string' && codeCell.trim() !== ''
 				) {
-					if (
-						i === 0 &&
-						(firstCell.toLowerCase().includes('code') ||
-							firstCell.toLowerCase().includes('code'))
-					) {
-						continue
-					}
-					codes.push(String(firstCell).trim())
+					codes.push({
+						code: String(codeCell),
+						serial: String(serialCell),
+						carton: String(cartonCell),
+					})
 				}
 			}
 
 			if (codes.length === 0) {
 				toast.error(
-					'No codes found in the Excel file. Please check the first column.',
+					'No codes found in the Excel file. Please check that both columns have data.',
 				)
 				setIsImporting(false)
 				setImportProgress(null)
@@ -104,7 +110,6 @@ export function ImportCodes() {
 			)
 			setImportProgress(null)
 
-			// Reset file input
 			if (fileInputRef.current) {
 				fileInputRef.current.value = ''
 			}
@@ -128,7 +133,8 @@ export function ImportCodes() {
 					Import Codes
 				</CardTitle>
 				<CardDescription className='text-center'>
-					Upload an Excel file with codes in the first column
+					Upload an Excel file with serial numbers in the first column and
+					scratchable codes in the second column
 				</CardDescription>
 			</CardHeader>
 			<CardContent className='space-y-4'>
@@ -166,7 +172,8 @@ export function ImportCodes() {
 										drag and drop
 									</p>
 									<p className='text-xs text-gray-500'>
-										Excel files (.xlsx, .xls, .csv) - Codes in first column
+										Excel files (.xlsx, .xls, .csv) - Serial # (Col 1), Codes
+										(Col 2)
 									</p>
 								</>
 							)}

@@ -1,5 +1,5 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
-import type { Row } from '@tanstack/react-table'
+import type { Row, Table as TanstackTable } from '@tanstack/react-table'
 import { api } from 'convex/_generated/api'
 import type { Id } from 'convex/_generated/dataModel'
 import { useQuery as useConvexQuery, useMutation } from 'convex/react'
@@ -18,14 +18,13 @@ import {
 	XCircle,
 } from 'lucide-react'
 import React, { useRef, useState } from 'react'
-import type { Table as TanstackTable } from '@tanstack/react-table'
 import { toast } from 'sonner'
+import { BulkPrizeAssignmentDialog } from '@/components/BulkPrizeAssignmentDialog'
 import { CopyCodeButton } from '@/components/copy-code'
 import { DataTable } from '@/components/data-table'
 import { EditCodeForm } from '@/components/EditCodeForm'
 import { ImportCodes } from '@/components/ImportCodes'
 import { PrizeAssignmentDialog } from '@/components/PrizeAssignmentDialog'
-import { BulkPrizeAssignmentDialog } from '@/components/BulkPrizeAssignmentDialog'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -84,7 +83,8 @@ function CodesPage() {
 	const codes = useQuery(api.codes.getAllCodes, {})
 	const deleteCodes = useMutation(api.codes.deleteCodes)
 	const [assignmentDialogOpen, setAssignmentDialogOpen] = useState(false)
-	const [bulkAssignmentDialogOpen, setBulkAssignmentDialogOpen] = useState(false)
+	const [bulkAssignmentDialogOpen, setBulkAssignmentDialogOpen] =
+		useState(false)
 	const [selectedCodeIds, setSelectedCodeIds] = useState<Id<'codes'>[]>([])
 	const [importDialog, setImportDialog] = useState(false)
 	const tableRef = useRef<TanstackTable<Code> | null>(null)
@@ -99,7 +99,7 @@ function CodesPage() {
 
 	return (
 		<div className='min-h-screen bg-gray-100 px-4 py-8'>
-			<div className='max-w-7xl mx-auto'>
+			<div className='max-w-full mx-auto'>
 				<Card>
 					<CardHeader>
 						<div className='flex items-center justify-between'>
@@ -129,9 +129,8 @@ function CodesPage() {
 						) : (
 							<DataTable
 								data={codes}
-								filterColumn='code'
+								filterColumn={['serial', 'code', 'carton']}
 								SelectedRowContent={props => {
-									// Store table reference
 									tableRef.current = props.table
 									const selectedIds = props.rows.map(row =>
 										row.getValue('id'),
@@ -183,6 +182,32 @@ function CodesPage() {
 												onCheckedChange={value => row.toggleSelected(!!value)}
 												aria-label='Select row'
 											/>
+										),
+									},
+									{
+										accessorKey: 'serial',
+										header: () => <div className='ml-4'>Serial</div>,
+										cell: ({ row }) => (
+											<div className='group flex items-center'>
+												<CopyCodeButton
+													code={row.getValue('serial')}
+													className='group-hover:opacity-90 opacity-0 transition-opacity'
+												/>
+												<p>{row.getValue('serial')}</p>
+											</div>
+										),
+									},
+									{
+										accessorKey: 'carton',
+										header: () => <div className='ml-4'>Carton</div>,
+										cell: ({ row }) => (
+											<div className='group flex items-center'>
+												<CopyCodeButton
+													code={row.getValue('carton')}
+													className='group-hover:opacity-90 opacity-0 transition-opacity'
+												/>
+												<p>{row.getValue('carton')}</p>
+											</div>
 										),
 									},
 									{

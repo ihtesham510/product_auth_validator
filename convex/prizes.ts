@@ -263,6 +263,8 @@ export const getClaimablePrizes = query({
 				return {
 					claimable_prize_id: claimablePrize._id,
 					code: code?.code ?? null,
+					serial: code?.serial ?? null,
+					carton: code?.carton ?? null,
 					user: verifiedCode
 						? {
 								name: verifiedCode.name,

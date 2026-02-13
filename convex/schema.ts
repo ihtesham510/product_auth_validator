@@ -14,8 +14,12 @@ export default defineSchema({
 
 	codes: defineTable({
 		code: v.string(),
+		serial: v.string(),
+		carton: v.string(),
 		isValid: v.boolean(),
-	}).index('code', ['code']),
+	})
+		.index('code', ['code'])
+		.index('by_serial', ['serial']),
 
 	verified_codes: defineTable({
 		name: v.string(),

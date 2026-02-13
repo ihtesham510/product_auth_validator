@@ -1,6 +1,7 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { useQuery } from 'convex-helpers/react/cache'
-import { api } from '../../convex/_generated/api'
+import { Trophy } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
 import {
 	Card,
 	CardContent,
@@ -16,8 +17,7 @@ import {
 	TableHeader,
 	TableRow,
 } from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
-import { Trophy } from 'lucide-react'
+import { api } from '../../convex/_generated/api'
 
 export const Route = createFileRoute('/verified-codes')({
 	component: VerifiedCodesPage,
@@ -43,7 +43,7 @@ function VerifiedCodesPage() {
 
 	return (
 		<div className='min-h-screen bg-gray-100 px-4 py-8'>
-			<div className='max-w-7xl mx-auto'>
+			<div className='max-w-full mx-auto'>
 				<Card>
 					<CardHeader>
 						<CardTitle className='text-2xl font-bold'>Verified Codes</CardTitle>
@@ -61,6 +61,8 @@ function VerifiedCodesPage() {
 								<Table>
 									<TableHeader>
 										<TableRow>
+											<TableHead>#</TableHead>
+											<TableHead>Carton</TableHead>
 											<TableHead>Name</TableHead>
 											<TableHead>Phone</TableHead>
 											<TableHead>Code</TableHead>
@@ -70,10 +72,17 @@ function VerifiedCodesPage() {
 									<TableBody>
 										{verifiedCodes.map(verifiedCode => (
 											<TableRow key={verifiedCode.id}>
+												<TableCell className='font-mono'>
+													{verifiedCode.serial}
+												</TableCell>
+												<TableCell className='font-mono'>
+													{verifiedCode.carton}
+												</TableCell>
 												<TableCell className='font-medium'>
 													{verifiedCode.name}
 												</TableCell>
 												<TableCell>{verifiedCode.phone}</TableCell>
+
 												<TableCell className='font-mono'>
 													{verifiedCode.code}
 												</TableCell>

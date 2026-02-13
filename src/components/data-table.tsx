@@ -1,4 +1,3 @@
-import * as React from 'react'
 import {
 	type ColumnDef,
 	type ColumnFiltersState,
@@ -7,13 +6,14 @@ import {
 	getFilteredRowModel,
 	getPaginationRowModel,
 	getSortedRowModel,
+	type Row,
 	type SortingState,
+	type Table as TanstackTable,
 	useReactTable,
 	type VisibilityState,
-	type Row,
-	type Table as TanstackTable,
 } from '@tanstack/react-table'
 import { ChevronDown, ChevronFirst, ChevronLast, Search } from 'lucide-react'
+import * as React from 'react'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -38,7 +38,7 @@ export function DataTable<T>({
 }: {
 	data: T[]
 	columns: ColumnDef<T>[]
-	filterColumn?: string
+	filterColumn?: string | string[]
 	SelectedRowContent?: (props: {
 		rows: Row<T>[]
 		table: TanstackTable<T>
@@ -52,6 +52,7 @@ export function DataTable<T>({
 	const [columnVisibility, setColumnVisibility] =
 		React.useState<VisibilityState>({})
 	const [rowSelection, setRowSelection] = React.useState({})
+	const [globalFilter, onGlobalFilterChange] = React.useState<string>('')
 
 	const table = useReactTable({
 		data: props.data,
@@ -64,29 +65,24 @@ export function DataTable<T>({
 		getFilteredRowModel: getFilteredRowModel(),
 		onColumnVisibilityChange: setColumnVisibility,
 		onRowSelectionChange: setRowSelection,
+		onGlobalFilterChange,
 		state: {
+			globalFilter,
 			sorting,
 			columnFilters,
 			columnVisibility,
 			rowSelection,
 		},
 	})
-
 	return (
 		<div className='w-full'>
 			<div className='flex items-center justify-between py-4'>
 				<InputGroup className='max-w-md'>
 					<InputGroupInput
 						placeholder={searchPlaceholder}
-						value={
-							(table
-								.getColumn(props.filterColumn ?? '')
-								?.getFilterValue() as string) ?? ''
-						}
+						value={globalFilter}
 						onChange={event =>
-							table
-								.getColumn(props.filterColumn ?? '')
-								?.setFilterValue(event.target.value)
+							table.setGlobalFilter(String(event.target.value))
 						}
 					/>
 					<InputGroupAddon>
