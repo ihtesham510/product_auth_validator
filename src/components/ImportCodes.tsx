@@ -1,3 +1,4 @@
+import { api } from 'convex/_generated/api'
 import { useMutation } from 'convex/react'
 import { FileSpreadsheet, Upload } from 'lucide-react'
 import { useRef, useState } from 'react'
@@ -10,7 +11,6 @@ import {
 	CardHeader,
 	CardTitle,
 } from '@/components/ui/card'
-import { api } from '../../convex/_generated/api'
 
 export function ImportCodes() {
 	const importCodes = useMutation(api.codes.importCodes)
@@ -171,9 +171,9 @@ export function ImportCodes() {
 										<span className='font-semibold'>Click to upload</span> or
 										drag and drop
 									</p>
-									<p className='text-xs text-gray-500'>
-										Excel files (.xlsx, .xls, .csv) - Serial # (Col 1), Codes
-										(Col 2)
+									<p className='text-xs text-green-600'>
+										Excel files (.xlsx, .xls, .csv) - Serial # (Col 1), Carton #
+										(Col 2), Code (Col 3)
 									</p>
 								</>
 							)}
