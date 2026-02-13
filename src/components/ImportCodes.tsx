@@ -51,21 +51,16 @@ export function ImportCodes() {
 			}) as string[][]
 
 			const codes: { serial: string; code: string; carton: string }[] = []
+			console.log(jsonData)
 
 			for (const row of jsonData) {
 				const serialCell = row[0]
 				const cartonCell = row[1]
 				const codeCell = row[2]
 				if (
-					(typeof cartonCell === 'string' || typeof cartonCell === 'number') &&
-					typeof cartonCell == 'string'
-						? cartonCell.trim() == ''
-						: true &&
-								(typeof serialCell === 'string' ||
-									typeof serialCell === 'number') &&
-								typeof serialCell == 'string'
-							? serialCell.trim() == ''
-							: true && typeof codeCell === 'string' && codeCell.trim() !== ''
+					typeof serialCell !== 'undefined' &&
+					typeof cartonCell !== 'undefined' &&
+					typeof codeCell !== 'undefined'
 				) {
 					codes.push({
 						code: String(codeCell),
