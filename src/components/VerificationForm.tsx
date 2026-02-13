@@ -262,8 +262,9 @@ export function VerificationForm() {
 							</AlertTitle>
 							<AlertDescription className='text-purple-700'>
 								<div className='mt-2 space-y-1'>
-									{dialogData.prize.description && (
+									{dialogData.prize && (
 										<div className='text-sm'>
+											Congratulations You've Won {dialogData.prize.name}.
 											{dialogData.prize.description}
 										</div>
 									)}
