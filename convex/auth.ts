@@ -1,4 +1,4 @@
-import { v } from 'convex/values'
+import { ConvexError, v } from 'convex/values'
 import type { MutationCtx, QueryCtx } from './_generated/server'
 import { mutation, query } from './_generated/server'
 
@@ -10,11 +10,31 @@ function generateSessionId(): string {
 }
 
 async function getAdminCredentialsFromQuery(ctx: QueryCtx) {
-	return await ctx.db.query('adminCredentials').first()
+	const credentials = await ctx.db.query('adminCredentials').first()
+	if (credentials) {
+		const decrypted_username = await decrypt(credentials?.username)
+		const decrypted_password = await decrypt(credentials?.password)
+		return {
+			...credentials,
+			decrypted_username,
+			decrypted_password,
+		}
+	}
+	return credentials
 }
 
 async function getAdminCredentialsFromMutation(ctx: MutationCtx) {
-	return await ctx.db.query('adminCredentials').first()
+	const credentials = await ctx.db.query('adminCredentials').first()
+	if (credentials) {
+		const decrypted_username = await decrypt(credentials?.username)
+		const decrypted_password = await decrypt(credentials?.password)
+		return {
+			...credentials,
+			username: decrypted_username,
+			password: decrypted_password,
+		}
+	}
+	return credentials
 }
 
 async function initializeAdminCredentials(ctx: MutationCtx) {
@@ -22,16 +42,22 @@ async function initializeAdminCredentials(ctx: MutationCtx) {
 	if (existing) {
 		return existing
 	}
+	const encryptedDefaultUsername = await encrypt(DEFAULT_USERNAME)
+	const encryptedDefaultPassword = await encrypt(DEFAULT_PASSWORD)
 
 	const defaultId = await ctx.db.insert('adminCredentials', {
-		username: DEFAULT_USERNAME,
-		password: DEFAULT_PASSWORD,
+		username: encryptedDefaultUsername,
+		password: encryptedDefaultPassword,
 	})
 	const credentials = await ctx.db.get(defaultId)
 	if (!credentials) {
 		throw new Error('Failed to initialize admin credentials')
 	}
-	return credentials
+	return {
+		...credentials,
+		username: await decrypt(credentials.username),
+		password: await decrypt(credentials.password),
+	}
 }
 
 export const login = mutation({
@@ -130,7 +156,7 @@ export const getAdminCredentials = query({
 		}
 
 		return {
-			username: credentials.username,
+			username: await decrypt(credentials.username),
 		}
 	},
 })
@@ -151,19 +177,139 @@ export const updateAdminCredentials = mutation({
 	},
 	handler: async (ctx: MutationCtx, args) => {
 		const credentials = await getAdminCredentialsFromMutation(ctx)
+		const encryptedUsername = await encrypt(args.username)
+		const encryptedPassword = await encrypt(args.password)
 
 		if (credentials) {
 			await ctx.db.patch(credentials._id, {
-				username: args.username,
-				password: args.password,
+				username: encryptedUsername,
+				password: encryptedPassword,
 			})
 		} else {
 			await ctx.db.insert('adminCredentials', {
-				username: args.username,
-				password: args.password,
+				username: encryptedUsername,
+				password: encryptedPassword,
 			})
 		}
 
 		return { success: true }
 	},
 })
+
+/**
+ * Encrypt a string using AES-256-GCM with Web Crypto API
+ * @param payload - The string to encrypt
+ * @param secretKey - Your secret key (any length)
+ * @returns Encrypted string in format: iv:ciphertext (hex encoded)
+ */
+export async function encrypt(payload: string): Promise<string> {
+	const secretKey = process.env.SECRET_KEY
+	if (!secretKey) throw new ConvexError('SECRET_KEY is required')
+
+	const encoder = new TextEncoder()
+
+	// Derive a 256-bit key from secret using SHA-256
+	const keyMaterial = await crypto.subtle.digest(
+		'SHA-256',
+		encoder.encode(secretKey),
+	)
+
+	// Import the key for AES-GCM
+	const key = await crypto.subtle.importKey(
+		'raw',
+		keyMaterial,
+		{ name: 'AES-GCM', length: 256 },
+		false,
+		['encrypt'],
+	)
+
+	// Generate random 12-byte IV
+	const iv = crypto.getRandomValues(new Uint8Array(12))
+
+	// Encrypt the payload
+	const encryptedBuffer = await crypto.subtle.encrypt(
+		{
+			name: 'AES-GCM',
+			iv: iv,
+		},
+		key,
+		encoder.encode(payload),
+	)
+
+	// Convert to hex strings
+	const encryptedArray = new Uint8Array(encryptedBuffer)
+	const ivHex = Array.from(iv)
+		.map(b => b.toString(16).padStart(2, '0'))
+		.join('')
+	const encryptedHex = Array.from(encryptedArray)
+		.map(b => b.toString(16).padStart(2, '0'))
+		.join('')
+
+	// Return format: iv:encrypted
+	return `${ivHex}:${encryptedHex}`
+}
+
+/**
+ * Decrypt a string using AES-256-GCM with Web Crypto API
+ * @param encryptedPayload - The encrypted string (iv:ciphertext format)
+ * @param secretKey - Your secret key (must be same as encryption)
+ * @returns Decrypted string
+ */
+export async function decrypt(encryptedPayload: string): Promise<string> {
+	const secretKey = process.env.SECRET_KEY
+	if (!secretKey) throw new ConvexError('SECRET_KEY is required')
+
+	try {
+		// Parse the encrypted data
+		const parts = encryptedPayload.split(':')
+		if (parts.length !== 2) {
+			throw new ConvexError(
+				'Invalid encrypted format. Expected format: iv:ciphertext',
+			)
+		}
+
+		const [ivHex, encryptedHex] = parts
+
+		// Convert hex strings back to Uint8Array
+		const iv = new Uint8Array(
+			ivHex.match(/.{2}/g)!.map(byte => parseInt(byte, 16)),
+		)
+		const encrypted = new Uint8Array(
+			encryptedHex.match(/.{2}/g)!.map(byte => parseInt(byte, 16)),
+		)
+
+		const encoder = new TextEncoder()
+
+		// Derive the same key
+		const keyMaterial = await crypto.subtle.digest(
+			'SHA-256',
+			encoder.encode(secretKey),
+		)
+
+		const key = await crypto.subtle.importKey(
+			'raw',
+			keyMaterial,
+			{ name: 'AES-GCM', length: 256 },
+			false,
+			['decrypt'],
+		)
+
+		// Decrypt
+		const decryptedBuffer = await crypto.subtle.decrypt(
+			{
+				name: 'AES-GCM',
+				iv: iv,
+			},
+			key,
+			encrypted,
+		)
+
+		// Convert back to string
+		const decoder = new TextDecoder()
+		return decoder.decode(decryptedBuffer)
+	} catch (error) {
+		throw new ConvexError(
+			`Decryption failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+		)
+	}
+}
