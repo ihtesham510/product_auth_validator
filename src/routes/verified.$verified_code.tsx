@@ -53,10 +53,64 @@ function RouteComponent() {
 
 	if (!code) {
 		return (
-			<div className='flex items-center justify-center h-screen w-full'>
-				<div className='flex flex-col text-center gap-6'>
-					<h1 className='text-8xl font-bold'>404</h1>
-					<p>Error: Code not found</p>
+			<div className='flex items-center justify-center min-h-screen w-full bg-linear-to-br from-red-50 to-orange-100 p-4'>
+				<div className='flex flex-col items-center justify-center max-w-2xl w-full bg-white rounded-2xl shadow-2xl p-8 md:p-12 space-y-6'>
+					{/* Error Badge */}
+					<div className='bg-red-100 border-2 border-red-500 rounded-full px-6 py-2 flex items-center gap-2'>
+						<svg
+							className='w-6 h-6 text-red-600'
+							fill='none'
+							stroke='currentColor'
+							viewBox='0 0 24 24'
+						>
+							<title>Error Badge</title>
+							<path
+								strokeLinecap='round'
+								strokeLinejoin='round'
+								strokeWidth={2}
+								d='M6 18L18 6M6 6l12 12'
+							/>
+						</svg>
+						<span className='text-red-700 font-semibold text-lg'>
+							Invalid Code
+						</span>
+					</div>
+
+					{/* 404 Icon */}
+					<div className='w-32 h-32 md:w-40 md:h-40 flex items-center justify-center'>
+						<svg
+							className='w-full h-full text-red-500'
+							fill='none'
+							stroke='currentColor'
+							viewBox='0 0 24 24'
+						>
+							<title>Not Found</title>
+							<path
+								strokeLinecap='round'
+								strokeLinejoin='round'
+								strokeWidth={1.5}
+								d='M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'
+							/>
+						</svg>
+					</div>
+
+					{/* Message */}
+					<div className='text-center space-y-3'>
+						<h1 className='text-6xl md:text-8xl font-bold text-red-600'>404</h1>
+						<h2 className='text-2xl md:text-3xl font-bold text-gray-800'>
+							Code Not Found
+						</h2>
+						<p className='text-base md:text-lg text-gray-600 max-w-md'>
+							The verification code you're looking for doesn't exist or may have been removed.
+						</p>
+					</div>
+
+					{/* Action Button */}
+					<Link to='/' className='w-full'>
+						<Button className='w-full text-lg py-6 bg-indigo-600 hover:bg-indigo-700 transition-colors'>
+							Go Back Home
+						</Button>
+					</Link>
 				</div>
 			</div>
 		)
@@ -133,8 +187,8 @@ function RouteComponent() {
 					)}
 				</div>
 
-				{/* Upload Button */}
-				{encryptedId && requires_cnic && (
+				{/* Upload Button or Go Back Button */}
+				{encryptedId && requires_cnic ? (
 					<Link
 						to='/upload/$id'
 						params={{ id: encryptedId }}
@@ -142,6 +196,12 @@ function RouteComponent() {
 					>
 						<Button className='w-full text-lg py-6 bg-indigo-600 hover:bg-indigo-700 transition-colors'>
 							Upload CNIC to Claim Prize
+						</Button>
+					</Link>
+				) : (
+					<Link to='/' className='w-full'>
+						<Button className='w-full text-lg py-6 bg-indigo-600 hover:bg-indigo-700 transition-colors'>
+							Go Back Home
 						</Button>
 					</Link>
 				)}

@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as Wrong_codeRouteImport } from './routes/wrong_code'
 import { Route as VerifiedCodesRouteImport } from './routes/verified-codes'
+import { Route as Used_codeRouteImport } from './routes/used_code'
 import { Route as PrizeWinnersRouteImport } from './routes/prize-winners'
 import { Route as PrizeDefinitionsRouteImport } from './routes/prize-definitions'
 import { Route as LoginRouteImport } from './routes/login'
@@ -28,6 +29,11 @@ const Wrong_codeRoute = Wrong_codeRouteImport.update({
 const VerifiedCodesRoute = VerifiedCodesRouteImport.update({
   id: '/verified-codes',
   path: '/verified-codes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const Used_codeRoute = Used_codeRouteImport.update({
+  id: '/used_code',
+  path: '/used_code',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrizeWinnersRoute = PrizeWinnersRouteImport.update({
@@ -78,6 +84,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/prize-definitions': typeof PrizeDefinitionsRoute
   '/prize-winners': typeof PrizeWinnersRoute
+  '/used_code': typeof Used_codeRoute
   '/verified-codes': typeof VerifiedCodesRoute
   '/wrong_code': typeof Wrong_codeRoute
   '/upload/$id': typeof UploadIdRoute
@@ -90,6 +97,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/prize-definitions': typeof PrizeDefinitionsRoute
   '/prize-winners': typeof PrizeWinnersRoute
+  '/used_code': typeof Used_codeRoute
   '/verified-codes': typeof VerifiedCodesRoute
   '/wrong_code': typeof Wrong_codeRoute
   '/upload/$id': typeof UploadIdRoute
@@ -103,6 +111,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/prize-definitions': typeof PrizeDefinitionsRoute
   '/prize-winners': typeof PrizeWinnersRoute
+  '/used_code': typeof Used_codeRoute
   '/verified-codes': typeof VerifiedCodesRoute
   '/wrong_code': typeof Wrong_codeRoute
   '/upload/$id': typeof UploadIdRoute
@@ -117,6 +126,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/prize-definitions'
     | '/prize-winners'
+    | '/used_code'
     | '/verified-codes'
     | '/wrong_code'
     | '/upload/$id'
@@ -129,6 +139,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/prize-definitions'
     | '/prize-winners'
+    | '/used_code'
     | '/verified-codes'
     | '/wrong_code'
     | '/upload/$id'
@@ -141,6 +152,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/prize-definitions'
     | '/prize-winners'
+    | '/used_code'
     | '/verified-codes'
     | '/wrong_code'
     | '/upload/$id'
@@ -154,6 +166,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   PrizeDefinitionsRoute: typeof PrizeDefinitionsRoute
   PrizeWinnersRoute: typeof PrizeWinnersRoute
+  Used_codeRoute: typeof Used_codeRoute
   VerifiedCodesRoute: typeof VerifiedCodesRoute
   Wrong_codeRoute: typeof Wrong_codeRoute
   UploadIdRoute: typeof UploadIdRoute
@@ -174,6 +187,13 @@ declare module '@tanstack/react-router' {
       path: '/verified-codes'
       fullPath: '/verified-codes'
       preLoaderRoute: typeof VerifiedCodesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/used_code': {
+      id: '/used_code'
+      path: '/used_code'
+      fullPath: '/used_code'
+      preLoaderRoute: typeof Used_codeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/prize-winners': {
@@ -242,6 +262,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   PrizeDefinitionsRoute: PrizeDefinitionsRoute,
   PrizeWinnersRoute: PrizeWinnersRoute,
+  Used_codeRoute: Used_codeRoute,
   VerifiedCodesRoute: VerifiedCodesRoute,
   Wrong_codeRoute: Wrong_codeRoute,
   UploadIdRoute: UploadIdRoute,

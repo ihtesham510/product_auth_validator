@@ -15,6 +15,7 @@ export const verifyCode = mutation({
 		let isValid = false
 		let hasPrize = false
 		let prize_info = null
+		let already_used = false
 		let message = 'Invalid Code'
 		let prizeClaimed = false
 		const codeDoc = await ctx.db
@@ -27,6 +28,7 @@ export const verifyCode = mutation({
 			isValid = codeDoc.isValid
 			if (!isValid) {
 				message = 'The Code is Already used.'
+				already_used = true
 			}
 			const prize = await ctx.db
 				.query('prizes')
@@ -61,6 +63,7 @@ export const verifyCode = mutation({
 			success,
 			isValid,
 			hasPrize,
+			already_used,
 			prize_info,
 			prizeClaimed,
 			message,
