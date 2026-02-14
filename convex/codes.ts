@@ -409,13 +409,14 @@ export const deleteCodes = mutation({
 		)
 	},
 })
-
 export const reset_data = mutation({
 	async handler(ctx) {
 		const codes = await ctx.db.query('codes').collect()
-		return await Promise.all(
+
+		// Process all deletions but don't return the array
+		await Promise.all(
 			codes.map(async code => {
-				const varified_codes = await ctx.db
+				const verified_codes = await ctx.db
 					.query('verified_codes')
 					.withIndex('code', q => q.eq('code', code._id))
 					.collect()
@@ -427,18 +428,26 @@ export const reset_data = mutation({
 					.query('claimable_prizes')
 					.withIndex('code_id', q => q.eq('code_id', code._id))
 					.collect()
-				for (const arr of [varified_codes, prizes, claimable_prizes]) {
-					await Promise.all(
-						arr.map(async item => {
-							if ('storageId' in item && item.storageId) {
-								await ctx.storage.delete(item.storageId)
-							}
-							return await ctx.db.delete(item._id)
-						}),
-					)
+
+				const arrays = [verified_codes, prizes, claimable_prizes]
+
+				for (const arr of arrays) {
+					for (const item of arr) {
+						if (
+							typeof item !== 'undefined' &&
+							'storageId' in item &&
+							item.storageId
+						) {
+							await ctx.storage.delete(item.storageId)
+						}
+						await ctx.db.delete(item._id)
+					}
 				}
-				return await ctx.db.delete(code._id)
+
+				await ctx.db.delete(code._id)
 			}),
 		)
+
+		return { success: true, deletedCount: codes.length }
 	},
 })
