@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as Wrong_codeRouteImport } from './routes/wrong_code'
 import { Route as VerifiedCodesRouteImport } from './routes/verified-codes'
 import { Route as PrizeWinnersRouteImport } from './routes/prize-winners'
 import { Route as PrizeDefinitionsRouteImport } from './routes/prize-definitions'
@@ -16,8 +17,14 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as CodesRouteImport } from './routes/codes'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as VerifiedVerified_codeRouteImport } from './routes/verified.$verified_code'
 import { Route as UploadIdRouteImport } from './routes/upload.$id'
 
+const Wrong_codeRoute = Wrong_codeRouteImport.update({
+  id: '/wrong_code',
+  path: '/wrong_code',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const VerifiedCodesRoute = VerifiedCodesRouteImport.update({
   id: '/verified-codes',
   path: '/verified-codes',
@@ -53,6 +60,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VerifiedVerified_codeRoute = VerifiedVerified_codeRouteImport.update({
+  id: '/verified/$verified_code',
+  path: '/verified/$verified_code',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const UploadIdRoute = UploadIdRouteImport.update({
   id: '/upload/$id',
   path: '/upload/$id',
@@ -67,7 +79,9 @@ export interface FileRoutesByFullPath {
   '/prize-definitions': typeof PrizeDefinitionsRoute
   '/prize-winners': typeof PrizeWinnersRoute
   '/verified-codes': typeof VerifiedCodesRoute
+  '/wrong_code': typeof Wrong_codeRoute
   '/upload/$id': typeof UploadIdRoute
+  '/verified/$verified_code': typeof VerifiedVerified_codeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -77,7 +91,9 @@ export interface FileRoutesByTo {
   '/prize-definitions': typeof PrizeDefinitionsRoute
   '/prize-winners': typeof PrizeWinnersRoute
   '/verified-codes': typeof VerifiedCodesRoute
+  '/wrong_code': typeof Wrong_codeRoute
   '/upload/$id': typeof UploadIdRoute
+  '/verified/$verified_code': typeof VerifiedVerified_codeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -88,7 +104,9 @@ export interface FileRoutesById {
   '/prize-definitions': typeof PrizeDefinitionsRoute
   '/prize-winners': typeof PrizeWinnersRoute
   '/verified-codes': typeof VerifiedCodesRoute
+  '/wrong_code': typeof Wrong_codeRoute
   '/upload/$id': typeof UploadIdRoute
+  '/verified/$verified_code': typeof VerifiedVerified_codeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -100,7 +118,9 @@ export interface FileRouteTypes {
     | '/prize-definitions'
     | '/prize-winners'
     | '/verified-codes'
+    | '/wrong_code'
     | '/upload/$id'
+    | '/verified/$verified_code'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -110,7 +130,9 @@ export interface FileRouteTypes {
     | '/prize-definitions'
     | '/prize-winners'
     | '/verified-codes'
+    | '/wrong_code'
     | '/upload/$id'
+    | '/verified/$verified_code'
   id:
     | '__root__'
     | '/'
@@ -120,7 +142,9 @@ export interface FileRouteTypes {
     | '/prize-definitions'
     | '/prize-winners'
     | '/verified-codes'
+    | '/wrong_code'
     | '/upload/$id'
+    | '/verified/$verified_code'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -131,11 +155,20 @@ export interface RootRouteChildren {
   PrizeDefinitionsRoute: typeof PrizeDefinitionsRoute
   PrizeWinnersRoute: typeof PrizeWinnersRoute
   VerifiedCodesRoute: typeof VerifiedCodesRoute
+  Wrong_codeRoute: typeof Wrong_codeRoute
   UploadIdRoute: typeof UploadIdRoute
+  VerifiedVerified_codeRoute: typeof VerifiedVerified_codeRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/wrong_code': {
+      id: '/wrong_code'
+      path: '/wrong_code'
+      fullPath: '/wrong_code'
+      preLoaderRoute: typeof Wrong_codeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/verified-codes': {
       id: '/verified-codes'
       path: '/verified-codes'
@@ -185,6 +218,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/verified/$verified_code': {
+      id: '/verified/$verified_code'
+      path: '/verified/$verified_code'
+      fullPath: '/verified/$verified_code'
+      preLoaderRoute: typeof VerifiedVerified_codeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/upload/$id': {
       id: '/upload/$id'
       path: '/upload/$id'
@@ -203,7 +243,9 @@ const rootRouteChildren: RootRouteChildren = {
   PrizeDefinitionsRoute: PrizeDefinitionsRoute,
   PrizeWinnersRoute: PrizeWinnersRoute,
   VerifiedCodesRoute: VerifiedCodesRoute,
+  Wrong_codeRoute: Wrong_codeRoute,
   UploadIdRoute: UploadIdRoute,
+  VerifiedVerified_codeRoute: VerifiedVerified_codeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

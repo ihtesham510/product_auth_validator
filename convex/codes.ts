@@ -129,6 +129,38 @@ export const getCodeStatus = query({
 	},
 })
 
+export const getVerifiedCode = query({
+	args: {
+		verified_code: v.string(),
+	},
+	async handler(ctx, args_0) {
+		const normalizeId = ctx.db.normalizeId(
+			'verified_codes',
+			args_0.verified_code,
+		)
+		if (!normalizeId) return null
+		const verified_code = await ctx.db.get(normalizeId)
+		if (!verified_code) return null
+		const prize = await ctx.db
+			.query('prizes')
+			.withIndex('code_id', q => q.eq('code_id', verified_code.code))
+			.first()
+		if (prize) {
+			const prizeDefinition = await ctx.db.get(prize.prize_definition_id)
+			if (!prizeDefinition) throw new ConvexError('prizeDefinition not found')
+			return {
+				...verified_code,
+				prize: {
+					...prize,
+					prize_definition_id: prizeDefinition,
+				},
+			}
+		}
+
+		return { ...verified_code, prize: null }
+	},
+})
+
 export const getVerifiedCodeByCodeId = query({
 	args: {
 		codeId: v.id('codes'),

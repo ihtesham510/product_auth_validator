@@ -1,8 +1,8 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useLocalStorage } from '@mantine/hooks'
-import { Link } from '@tanstack/react-router'
+import { Link, useRouter } from '@tanstack/react-router'
 import { api } from 'convex/_generated/api'
-import { useAction, useMutation } from 'convex/react'
+import { useMutation } from 'convex/react'
 import { AlertCircle, CheckCircle2, Gift, XCircle } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -44,7 +44,7 @@ type VerificationFormValues = z.infer<typeof verificationSchema>
 
 export function VerificationForm() {
 	const verifyCode = useMutation(api.codes.verifyCode)
-	const enterClaimablePrize = useMutation(api.prizes.enterClaimablePrize)
+	const router = useRouter()
 	const [dialogData, setDialogData] = useLocalStorage<{
 		type: 'success' | 'error'
 		title: string
@@ -64,7 +64,6 @@ export function VerificationForm() {
 	})
 
 	const [dialogOpen, setDialogOpen] = useState(false)
-	const encrypt = useAction(api.node.encrypt)
 
 	const form = useForm<VerificationFormValues>({
 		resolver: zodResolver(verificationSchema),
@@ -92,47 +91,19 @@ export function VerificationForm() {
 			code: values.code.trim(),
 			phone: values.phone.trim(),
 		})
-		if (!res.prize_info?.requires_cnic && res.id) {
-			await enterClaimablePrize({
-				verified_code_id: res.id,
-			})
-		}
 
-		if (res.success) {
-			setDialogData({
-				type: 'success',
-				title: res.isValid
-					? 'Product Is Original'
-					: 'Product Is Genuine (Already Used)',
-				message: res.message || 'The Code is Valid',
-				details: {
-					name: values.name.trim(),
-					phone: values.phone.trim(),
+		if (res.success && res.id) {
+			router.navigate({
+				to: '/verified/$verified_code',
+				params: {
+					verified_code: res.id,
 				},
-				uploadId:
-					res.id && !res.prizeClaimed
-						? await encrypt({ id: res.id })
-						: undefined,
-				isValid: res.isValid,
-				prize: res.prize_info
-					? {
-							name: res.prize_info.prize_name,
-							description: res.prize_info.description,
-							requires_cnic: res.prize_info.requires_cnic,
-						}
-					: null,
-				hasPrize: res.hasPrize || false,
 			})
 		} else {
-			setDialogData({
-				message:
-					res.message ||
-					'Invalid code. This code does not exist in our system.',
-				title: 'Product Is Not Valid',
-				type: 'error',
+			router.navigate({
+				to: '/wrong_code',
 			})
 		}
-		setDialogOpen(true)
 	}
 
 	return (
