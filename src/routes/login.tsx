@@ -1,6 +1,7 @@
+import { zodResolver } from '@hookform/resolvers/zod'
 import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router'
 import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
+import { toast } from 'sonner'
 import * as z from 'zod'
 import { Button } from '@/components/ui/button'
 import {
@@ -19,7 +20,6 @@ import {
 	FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { toast } from 'sonner'
 import { useAuth } from '@/contexts/AuthContext'
 
 const loginSchema = z.object({
@@ -55,6 +55,10 @@ function LoginPage() {
 		const res = await login(values.username, values.password)
 		if (res === 'Invalid username or password') {
 			toast.error(res)
+			form.setError('username', {
+				type: 'manual',
+				message: 'Invalid username or password',
+			})
 		} else {
 			navigate({ to: '/' })
 			toast.success('Logged In')
