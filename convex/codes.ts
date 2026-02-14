@@ -430,6 +430,9 @@ export const reset_data = mutation({
 				for (const arr of [varified_codes, prizes, claimable_prizes]) {
 					await Promise.all(
 						arr.map(async item => {
+							if ('storageId' in item && item.storageId) {
+								await ctx.storage.delete(item.storageId)
+							}
 							return await ctx.db.delete(item._id)
 						}),
 					)
