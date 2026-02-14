@@ -1,10 +1,8 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useLocalStorage } from '@mantine/hooks'
-import { Link, useRouter } from '@tanstack/react-router'
+import { useRouter } from '@tanstack/react-router'
 import { api } from 'convex/_generated/api'
 import { useMutation } from 'convex/react'
-import { AlertCircle, CheckCircle2, Gift, XCircle } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { XCircle } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
 import { Button } from '@/components/ui/button'
@@ -16,12 +14,6 @@ import {
 	CardTitle,
 } from '@/components/ui/card'
 import {
-	Dialog,
-	DialogContent,
-	DialogFooter,
-	DialogHeader,
-} from '@/components/ui/dialog'
-import {
 	Form,
 	FormControl,
 	FormDescription,
@@ -31,7 +23,6 @@ import {
 	FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { Alert, AlertDescription, AlertTitle } from './ui/alert'
 import { PhoneInput } from './ui/phone-input'
 
 const verificationSchema = z.object({
@@ -45,25 +36,6 @@ type VerificationFormValues = z.infer<typeof verificationSchema>
 export function VerificationForm() {
 	const verifyCode = useMutation(api.codes.verifyCode)
 	const router = useRouter()
-	const [dialogData, setDialogData] = useLocalStorage<{
-		type: 'success' | 'error'
-		title: string
-		message: string
-		details?: { name: string; phone: string }
-		isValid?: boolean
-		prize?: {
-			name: string
-			description: string
-			requires_cnic: boolean
-		} | null
-		uploadId?: string
-		hasPrize?: boolean
-	} | null>({
-		key: 'prize data',
-		defaultValue: null,
-	})
-
-	const [dialogOpen, setDialogOpen] = useState(false)
 
 	const form = useForm<VerificationFormValues>({
 		resolver: zodResolver(verificationSchema),
@@ -73,18 +45,6 @@ export function VerificationForm() {
 			phone: '',
 		},
 	})
-
-	useEffect(() => {
-		if (dialogData) setDialogOpen(true)
-	}, [dialogData])
-
-	useEffect(() => {
-		if (!dialogOpen) {
-			setDialogData(null)
-			form.reset()
-		}
-	}, [dialogOpen, form, setDialogData])
-
 	const onSubmit = async (values: VerificationFormValues) => {
 		const res = await verifyCode({
 			name: values.name.trim(),
@@ -198,89 +158,6 @@ export function VerificationForm() {
 					</form>
 				</Form>
 			</CardContent>
-
-			<Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-				<DialogContent className='pt-10'>
-					<DialogHeader>
-						{dialogData?.type === 'success' ? (
-							<Alert
-								className={
-									dialogData.isValid === false
-										? 'bg-yellow-50 border-yellow-200'
-										: 'bg-green-400'
-								}
-							>
-								<CheckCircle2
-									className={`h-6 w-6 ${dialogData.isValid === false ? 'text-yellow-600' : 'text-green-600'}`}
-								/>
-								<AlertTitle>{dialogData?.title}</AlertTitle>
-								<AlertDescription>{dialogData?.message}</AlertDescription>
-							</Alert>
-						) : (
-							<Alert className='bg-red-400'>
-								<AlertCircle className='h-6 w-6 text-red-600' />
-								<AlertTitle>The Product Code is not valid.</AlertTitle>
-								<AlertDescription>{dialogData?.message}</AlertDescription>
-							</Alert>
-						)}
-					</DialogHeader>
-
-					{dialogData?.hasPrize && dialogData?.prize && dialogData.uploadId && (
-						<Alert className='bg-purple-50 border-purple-200'>
-							<Gift className='h-6 w-6 text-purple-600' />
-							<AlertTitle className='text-purple-800'>
-								Congratulations! You've Won {dialogData.prize.name}!
-							</AlertTitle>
-							<AlertDescription className='text-purple-700'>
-								<div className='mt-2 space-y-1'>
-									{dialogData.prize && (
-										<div className='text-sm'>
-											{dialogData.prize.description}
-										</div>
-									)}
-								</div>
-								{dialogData.prize.requires_cnic && (
-									<Link to='/upload/$id' params={{ id: dialogData.uploadId }}>
-										<Button>Upload</Button>
-									</Link>
-								)}
-							</AlertDescription>
-						</Alert>
-					)}
-
-					{dialogData?.details && dialogData?.isValid === true && (
-						<div className='py-4 space-y-2'>
-							<div className='text-sm font-medium text-gray-700'>
-								Verified Details:
-							</div>
-							<div className='space-y-1 text-sm text-gray-600'>
-								<div>
-									<span className='font-medium'>Name:</span>{' '}
-									{dialogData.details.name}
-								</div>
-								<div>
-									<span className='font-medium'>Phone:</span>{' '}
-									{dialogData.details.phone}
-								</div>
-							</div>
-						</div>
-					)}
-
-					{dialogData?.isValid === false && (
-						<Alert className='bg-blue-50 border-blue-200'>
-							<AlertCircle className='h-5 w-5 text-blue-600' />
-							<AlertDescription className='text-blue-700 text-sm'>
-								Note: This product code is genuine and authentic, but it has
-								already been verified previously.
-							</AlertDescription>
-						</Alert>
-					)}
-
-					<DialogFooter>
-						<Button onClick={() => setDialogOpen(false)}>Close</Button>
-					</DialogFooter>
-				</DialogContent>
-			</Dialog>
 		</Card>
 	)
 }
