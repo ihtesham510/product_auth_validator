@@ -62,7 +62,7 @@ function RouteComponent() {
 		)
 	}
 	return (
-		<div className='flex items-center justify-center min-h-screen w-full bg-gradient-to-br from-blue-50 to-indigo-100 p-4'>
+		<div className='flex items-center justify-center min-h-screen w-full bg-linear-to-br from-blue-50 to-indigo-100 p-4'>
 			<div className='flex flex-col items-center justify-center max-w-2xl w-full bg-white rounded-2xl shadow-2xl p-8 md:p-12 space-y-6'>
 				{/* Valid Code Badge */}
 				<div className='bg-green-100 border-2 border-green-500 rounded-full px-6 py-2 flex items-center gap-2'>
@@ -135,7 +135,11 @@ function RouteComponent() {
 
 				{/* Upload Button */}
 				{encryptedId && requires_cnic && (
-					<Link to='/upload/$id' params={{ id: encryptedId }} className='w-full'>
+					<Link
+						to='/upload/$id'
+						params={{ id: encryptedId }}
+						className='w-full'
+					>
 						<Button className='w-full text-lg py-6 bg-indigo-600 hover:bg-indigo-700 transition-colors'>
 							Upload CNIC to Claim Prize
 						</Button>
