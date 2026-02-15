@@ -2,8 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from '@tanstack/react-router'
 import { api } from 'convex/_generated/api'
 import { useMutation } from 'convex/react'
-import { ArrowLeft, ArrowRight, Check } from 'lucide-react'
-import { useState } from 'react'
+import { Check } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
 import { Button } from '@/components/ui/button'
@@ -48,7 +47,6 @@ const verificationSchema = z.object({
 type VerificationFormValues = z.infer<typeof verificationSchema>
 
 export function VerificationForm() {
-	const [currentStep, setCurrentStep] = useState(1)
 	const verifyCode = useMutation(api.codes.verifyCode)
 	const router = useRouter()
 
@@ -89,37 +87,6 @@ export function VerificationForm() {
 		}
 	}
 
-	const validateStep = async (step: number): Promise<boolean> => {
-		let isValid = false
-
-		switch (step) {
-			case 1:
-				isValid = await form.trigger('name')
-				break
-			case 2:
-				isValid = await form.trigger('phone')
-				break
-			case 3:
-				isValid = await form.trigger('code')
-				break
-			default:
-				isValid = false
-		}
-
-		return isValid
-	}
-
-	const handleNext = async () => {
-		const isValid = await validateStep(currentStep)
-		if (isValid) {
-			setCurrentStep(prev => Math.min(prev + 1, 3))
-		}
-	}
-
-	const handleBack = () => {
-		setCurrentStep(prev => Math.max(prev - 1, 1))
-	}
-
 	return (
 		<Card className='w-full max-w-2xl'>
 			<CardHeader className='space-y-1'>
@@ -127,157 +94,97 @@ export function VerificationForm() {
 					Verify Product Code
 				</CardTitle>
 				<CardDescription className='text-center'>
-					Complete the steps below to verify your product
+					Enter your details to verify your product
 				</CardDescription>
 			</CardHeader>
 
 			<CardContent>
 				<Form {...form}>
 					<form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
-						{/* Step 1: Name */}
-						{currentStep === 1 && (
-							<div className='space-y-4 animate-in fade-in slide-in-from-right-4 duration-300'>
-								<div className='text-center mb-6'>
-									<h3 className='text-lg font-semibold text-gray-900'>
-										What's your name?
-									</h3>
-									<p className='text-sm text-gray-600 mt-1'>
-										Please enter your full name
-									</p>
-								</div>
-								<FormField
-									control={form.control}
-									name='name'
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>Full Name</FormLabel>
-											<FormControl>
-												<Input
-													placeholder='John Doe'
-													className='text-lg py-6'
-													autoFocus
-													{...field}
-												/>
-											</FormControl>
-											<FormDescription>
-												Enter your complete legal name
-											</FormDescription>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
-							</div>
-						)}
+						{/* Name Field */}
+						<FormField
+							control={form.control}
+							name='name'
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Full Name</FormLabel>
+									<FormControl>
+										<Input
+											placeholder='John Doe'
+											{...field}
+										/>
+									</FormControl>
+									<FormDescription>
+										Enter your complete legal name
+									</FormDescription>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
 
-						{/* Step 2: Phone */}
-						{currentStep === 2 && (
-							<div className='space-y-4 animate-in fade-in slide-in-from-right-4 duration-300'>
-								<div className='text-center mb-6'>
-									<h3 className='text-lg font-semibold text-gray-900'>
-										What's your phone number?
-									</h3>
-									<p className='text-sm text-gray-600 mt-1'>
-										We'll use this to contact you about your verification
-									</p>
-								</div>
-								<FormField
-									control={form.control}
-									name='phone'
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>Phone Number</FormLabel>
-											<FormControl>
-												<PhoneInput
-													defaultCountry='PK'
-													placeholder='Enter your phone number'
-													disabled={form.formState.isSubmitting}
-													{...field}
-												/>
-											</FormControl>
-											<FormDescription>
-												Include country code (e.g., +92 for Pakistan)
-											</FormDescription>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
-							</div>
-						)}
+						{/* Phone Field */}
+						<FormField
+							control={form.control}
+							name='phone'
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Phone Number</FormLabel>
+									<FormControl>
+										<PhoneInput
+											defaultCountry='PK'
+											placeholder='Enter your phone number'
+											disabled={form.formState.isSubmitting}
+											{...field}
+										/>
+									</FormControl>
+									<FormDescription>
+										Include country code (e.g., +92 for Pakistan)
+									</FormDescription>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
 
-						{/* Step 3: Code */}
-						{currentStep === 3 && (
-							<div className='space-y-4 animate-in fade-in slide-in-from-right-4 duration-300'>
-								<div className='text-center mb-6'>
-									<h3 className='text-lg font-semibold text-gray-900'>
-										Enter your verification code
-									</h3>
-									<p className='text-sm text-gray-600 mt-1'>
+						{/* Code Field */}
+						<FormField
+							control={form.control}
+							name='code'
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Product Code</FormLabel>
+									<FormControl>
+										<Input
+											placeholder='Enter code from product'
+											className='tracking-wider font-mono'
+											{...field}
+										/>
+									</FormControl>
+									<FormDescription>
 										Scratch the card to reveal your unique code
-									</p>
-								</div>
-								<FormField
-									control={form.control}
-									name='code'
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>Product Code</FormLabel>
-											<FormControl>
-												<Input
-													placeholder='Enter code from product'
-													className='text-lg py-6 tracking-wider font-mono'
-													autoFocus
-													{...field}
-												/>
-											</FormControl>
-											<FormDescription>
-												Enter the code exactly as shown on your product
-											</FormDescription>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
-							</div>
-						)}
-
-						{/* Navigation Buttons */}
-						<div className='flex gap-3 pt-4'>
-							{currentStep > 1 && (
-								<Button
-									type='button'
-									variant='outline'
-									onClick={handleBack}
-									className='flex-1'
-								>
-									<ArrowLeft className='w-4 h-4 mr-2' />
-									Back
-								</Button>
+									</FormDescription>
+									<FormMessage />
+								</FormItem>
 							)}
+						/>
 
-							{currentStep < 3 ? (
-								<Button type='button' onClick={handleNext} className='flex-1'>
-									Next
-									<ArrowRight className='w-4 h-4 ml-2' />
-								</Button>
+						{/* Submit Button */}
+						<Button
+							type='submit'
+							className='w-full'
+							disabled={form.formState.isSubmitting}
+						>
+							{form.formState.isSubmitting ? (
+								<>
+									<div className='w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin' />
+									Verifying...
+								</>
 							) : (
-								<Button
-									type='submit'
-									className='flex-1'
-									disabled={form.formState.isSubmitting}
-								>
-									{form.formState.isSubmitting ? (
-										<>
-											<div className='w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin' />
-											Verifying...
-										</>
-									) : (
-										<>
-											Verify Code
-											<Check className='w-4 h-4 ml-2' />
-										</>
-									)}
-								</Button>
+								<>
+									Verify Code
+									<Check className='w-4 h-4 ml-2' />
+								</>
 							)}
-						</div>
+						</Button>
 					</form>
 				</Form>
 			</CardContent>
