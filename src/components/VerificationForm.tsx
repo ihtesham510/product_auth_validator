@@ -109,10 +109,7 @@ export function VerificationForm() {
 								<FormItem>
 									<FormLabel>Full Name</FormLabel>
 									<FormControl>
-										<Input
-											placeholder='John Doe'
-											{...field}
-										/>
+										<Input placeholder='Enter your name' {...field} />
 									</FormControl>
 									<FormDescription>
 										Enter your complete legal name
