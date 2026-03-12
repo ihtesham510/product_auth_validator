@@ -10,67 +10,87 @@ export const verifyCode = mutation({
 		cnic_image_url: v.optional(v.string()),
 	},
 	handler: async (ctx, args) => {
-		let id = null
-		let success = false
-		let isValid = false
-		let hasPrize = false
-		let prize_info = null
-		let already_used = false
-		let message = 'Invalid Code'
-		let prizeClaimed = false
+		// 1. Look up the code
 		const codeDoc = await ctx.db
 			.query('codes')
 			.withIndex('code', q => q.eq('code', args.code))
 			.first()
-		if (codeDoc) {
-			success = true
-			message = 'The Code is Valid'
-			isValid = codeDoc.isValid
-			if (!isValid) {
-				message = 'The Code is Already used.'
-				already_used = true
+
+		// 2. Code not found
+		if (!codeDoc) {
+			return {
+				id: null,
+				success: false,
+				isValid: false,
+				hasPrize: false,
+				already_used: false,
+				prize_info: null,
+				prizeClaimed: false,
+				message: 'Invalid Code',
 			}
-			const prize = await ctx.db
-				.query('prizes')
+		}
+
+		// 3. Code found but already used — return early, do NOT re-patch
+		if (!codeDoc.isValid) {
+			return {
+				id: codeDoc._id,
+				success: true,
+				isValid: false,
+				hasPrize: false,
+				already_used: true,
+				prize_info: null,
+				prizeClaimed: false,
+				message: 'The Code is Already used.',
+			}
+		}
+
+		// 4. Valid code — check for a prize
+		let hasPrize = false
+		let prize_info = null
+		let prizeClaimed = false
+
+		const prize = await ctx.db
+			.query('prizes')
+			.withIndex('code_id', q => q.eq('code_id', codeDoc._id))
+			.first()
+
+		if (prize) {
+			hasPrize = true
+
+			// FIX: use ctx.db.get() instead of a non-existent 'by_id' index
+			const prize_def = await ctx.db.get(prize.prize_definition_id)
+			prize_info = prize_def ?? null
+
+			const claimable_prize = await ctx.db
+				.query('claimable_prizes')
 				.withIndex('code_id', q => q.eq('code_id', codeDoc._id))
 				.first()
-			if (prize) {
-				hasPrize = true
-				const prize_def = await ctx.db
-					.query('prize_definitions')
-					.withIndex('by_id', q => q.eq('_id', prize.prize_definition_id))
-					.first()
-				const claimable_prize = await ctx.db
-					.query('claimable_prizes')
-					.withIndex('code_id', q => q.eq('code_id', codeDoc._id))
-					.first()
-				prizeClaimed = !!claimable_prize
-				prize_info = prize_def ? prize_def : undefined
-			}
-			const verifiedDoc = await ctx.db.insert('verified_codes', {
-				name: args.name,
-				phone: args.phone,
-				code: codeDoc._id,
-			})
-			id = verifiedDoc ?? null
 
-			await ctx.db.patch(codeDoc._id, {
-				isValid: false,
-			})
+			prizeClaimed = !!claimable_prize
 		}
+
+		// 5. Insert verified_codes entry
+		const verifiedCodeId = await ctx.db.insert('verified_codes', {
+			name: args.name,
+			phone: args.phone,
+			code: codeDoc._id,
+		})
+
+		// 6. Mark the code as used AFTER all reads succeed
+		await ctx.db.patch(codeDoc._id, { isValid: false })
+
 		return {
-			id,
-			success,
-			isValid,
+			id: verifiedCodeId, // FIX: return the verified_codes ID, not codeDoc._id
+			success: true,
+			isValid: true, // it WAS valid when submitted
 			hasPrize,
-			already_used,
+			already_used: false,
 			prize_info,
 			prizeClaimed,
-			message,
+			message: 'The Code is Valid',
 		}
 	},
 })
-
 export const verifyPrize = query({
 	args: {
 		id: v.optional(v.id('verified_codes')),
