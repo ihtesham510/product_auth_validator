@@ -1,6 +1,7 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { useQuery } from 'convex-helpers/react/cache'
 import { Trophy } from 'lucide-react'
+import { DataTable } from '@/components/data-table'
 import { Badge } from '@/components/ui/badge'
 import {
 	Card,
@@ -57,50 +58,58 @@ function VerifiedCodesPage() {
 								No verified codes found.
 							</div>
 						) : (
-							<div className='rounded-md border'>
-								<Table>
-									<TableHeader>
-										<TableRow>
-											<TableHead>#</TableHead>
-											<TableHead>Carton</TableHead>
-											<TableHead>Name</TableHead>
-											<TableHead>Phone</TableHead>
-											<TableHead>Code</TableHead>
-											<TableHead>Prize</TableHead>
-										</TableRow>
-									</TableHeader>
-									<TableBody>
-										{verifiedCodes.map(verifiedCode => (
-											<TableRow key={verifiedCode.id}>
-												<TableCell className='font-mono'>
-													{verifiedCode.serial}
-												</TableCell>
-												<TableCell className='font-mono'>
-													{verifiedCode.carton}
-												</TableCell>
-												<TableCell className='font-medium'>
-													{verifiedCode.name}
-												</TableCell>
-												<TableCell>{verifiedCode.phone}</TableCell>
-
-												<TableCell className='font-mono'>
-													{verifiedCode.code}
-												</TableCell>
-												<TableCell>
-													{verifiedCode.prizeName ? (
+							<DataTable
+								data={verifiedCodes}
+								filterColumn={['serial', 'carton']}
+								columns={[
+									{
+										header: '#',
+										accessorKey: 'serial',
+										cell(props) {
+											return <div>{props.row.original.serial}</div>
+										},
+									},
+									{
+										header: 'Carton',
+										accessorKey: 'carton',
+										cell(props) {
+											return <div>{props.row.original.carton}</div>
+										},
+									},
+									{
+										header: 'Name',
+										accessorKey: 'name',
+										cell(props) {
+											return <div>{props.row.original.name}</div>
+										},
+									},
+									{
+										header: 'Phone',
+										accessorKey: 'phone',
+										cell(props) {
+											return <div>{props.row.original.phone}</div>
+										},
+									},
+									{
+										header: 'prize',
+										accessorKey: 'prizeName',
+										cell(props) {
+											return (
+												<div>
+													{props.row.original.prizeName ? (
 														<Badge variant='outline' className='bg-yellow-50'>
 															<Trophy className='h-3 w-3 mr-1' />
-															{verifiedCode.prizeName}
+															{props.row.original.prizeName}
 														</Badge>
 													) : (
 														<span className='text-gray-400'>No prize</span>
 													)}
-												</TableCell>
-											</TableRow>
-										))}
-									</TableBody>
-								</Table>
-							</div>
+												</div>
+											)
+										},
+									},
+								]}
+							/>
 						)}
 					</CardContent>
 				</Card>
